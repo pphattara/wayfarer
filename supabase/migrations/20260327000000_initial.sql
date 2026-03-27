@@ -19,7 +19,8 @@ create table public.trips (
   start_date date not null,
   end_date date not null,
   status text not null default 'planning' check (status in ('planning','confirmed','completed')),
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  check (end_date >= start_date)
 );
 
 -- Itinerary days
@@ -28,7 +29,8 @@ create table public.itinerary_days (
   trip_id uuid references public.trips(id) on delete cascade not null,
   day_number int not null,
   date date not null,
-  items jsonb not null default '[]'
+  items jsonb not null default '[]',
+  unique (trip_id, day_number)
 );
 
 -- Visa summaries
@@ -62,8 +64,8 @@ create table public.best_time_cache (
 create table public.places (
   id uuid primary key default gen_random_uuid(),
   name text not null,
-  lat float not null,
-  lng float not null,
+  lat double precision not null,
+  lng double precision not null,
   mapbox_id text,
   category text not null default 'other',
   created_by uuid references public.users(id) on delete set null
@@ -95,23 +97,31 @@ alter table public.collections enable row level security;
 alter table public.collection_places enable row level security;
 
 -- RLS policies
+
 create policy "Users can read/write own profile"
-  on public.users for all using (auth.uid() = id);
+  on public.users for all
+  using (auth.uid() = id)
+  with check (auth.uid() = id);
 
 create policy "Users can read/write own trips"
-  on public.trips for all using (auth.uid() = user_id);
+  on public.trips for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
 
 create policy "Users can read/write own itinerary days"
   on public.itinerary_days for all
-  using (exists (select 1 from public.trips where id = trip_id and user_id = auth.uid()));
+  using (exists (select 1 from public.trips where id = trip_id and user_id = auth.uid()))
+  with check (exists (select 1 from public.trips where id = trip_id and user_id = auth.uid()));
 
 create policy "Users can read/write own visa summaries"
   on public.visa_summaries for all
-  using (exists (select 1 from public.trips where id = trip_id and user_id = auth.uid()));
+  using (exists (select 1 from public.trips where id = trip_id and user_id = auth.uid()))
+  with check (exists (select 1 from public.trips where id = trip_id and user_id = auth.uid()));
 
 create policy "Users can read/write own weather packs"
   on public.weather_packs for all
-  using (exists (select 1 from public.trips where id = trip_id and user_id = auth.uid()));
+  using (exists (select 1 from public.trips where id = trip_id and user_id = auth.uid()))
+  with check (exists (select 1 from public.trips where id = trip_id and user_id = auth.uid()));
 
 create policy "Best time cache is readable by all authenticated users"
   on public.best_time_cache for select using (auth.role() = 'authenticated');
@@ -119,29 +129,61 @@ create policy "Best time cache is readable by all authenticated users"
 create policy "Service role can write best time cache"
   on public.best_time_cache for insert with check (auth.role() = 'service_role');
 
+create policy "Service role can update best time cache"
+  on public.best_time_cache for update
+  using (auth.role() = 'service_role')
+  with check (auth.role() = 'service_role');
+
 create policy "Places are readable by all authenticated users"
   on public.places for select using (auth.role() = 'authenticated');
 
 create policy "Users can create places"
   on public.places for insert with check (auth.uid() = created_by);
 
+create policy "Users can update own places"
+  on public.places for update
+  using (auth.uid() = created_by)
+  with check (auth.uid() = created_by);
+
+create policy "Users can delete own places"
+  on public.places for delete
+  using (auth.uid() = created_by);
+
 create policy "Users can read/write own collections"
-  on public.collections for all using (auth.uid() = user_id);
+  on public.collections for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
 
 create policy "Users can manage own collection places"
   on public.collection_places for all
-  using (exists (select 1 from public.collections where id = collection_id and user_id = auth.uid()));
+  using (exists (select 1 from public.collections where id = collection_id and user_id = auth.uid()))
+  with check (exists (select 1 from public.collections where id = collection_id and user_id = auth.uid()));
 
 -- Trigger: auto-create user profile on sign-up
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
   insert into public.users (id, email, display_name)
-  values (new.id, new.email, coalesce(new.raw_user_meta_data->>'full_name', ''));
+  values (
+    new.id,
+    coalesce(new.email, ''),
+    coalesce(new.raw_user_meta_data->>'full_name', '')
+  )
+  on conflict (id) do nothing;
+  return new;
+exception when others then
   return new;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = public;
 
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
+
+-- Performance indices
+create index on public.trips (user_id);
+create index on public.itinerary_days (trip_id);
+create index on public.visa_summaries (trip_id);
+create index on public.weather_packs (trip_id);
+create index on public.collections (user_id);
+create index on public.collection_places (place_id);
