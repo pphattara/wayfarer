@@ -33,12 +33,15 @@
     "@types/react": "~19.2.2",
     "jest": "^30.3.0",
     "jest-expo": "^55.0.12-canary-20260327-0789fbc",
+    "supabase": "^2.84.4",
     "typescript": "~5.9.2"
   },
   "private": true,
   "jest": {
     "preset": "jest-expo",
-    "setupFilesAfterFramework": ["@testing-library/jest-native/extend-expect"],
+    "setupFilesAfterFramework": [
+      "@testing-library/jest-native/extend-expect"
+    ],
     "transformIgnorePatterns": [
       "node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|@rnmapbox/.*|react-native-url-polyfill|@supabase/.*|@react-native-async-storage/.*))"
     ]
