@@ -1,0 +1,28 @@
+# Worktrees
+.worktrees/
+
+# Expo / React Native
+node_modules/
+.expo/
+dist/
+web-build/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Environment
+.env
+.env.local
+.env*.local
+
+# macOS
+.DS_Store
+
+# Supabase
+.supabase/
+
+# Superpowers
+.superpowers/
