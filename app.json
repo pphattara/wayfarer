@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "Wayfarer",
+    "slug": "wayfarer",
+    "scheme": "wayfarer",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "com.wayfarer.app",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Wayfarer uses your location to show nearby places on the map."
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-dev-client",
+      [
+        "@rnmapbox/maps",
+        { "RNMapboxMapsDownloadToken": "YOUR_MAPBOX_SECRET_TOKEN" }
+      ],
+      "expo-apple-authentication",
+      [
+        "expo-location",
+        { "locationWhenInUsePermission": "Wayfarer uses your location to show nearby places on the map." }
+      ]
+    ],
+    "extra": {
+      "mapboxAccessToken": "YOUR_MAPBOX_PUBLIC_TOKEN"
+    }
+  }
+}
