@@ -39,9 +39,14 @@
   "private": true,
   "jest": {
     "preset": "jest-expo",
-    "setupFilesAfterFramework": [
+    "setupFilesAfterEnv": [
       "@testing-library/jest-native/extend-expect"
     ],
+    "moduleNameMapper": {
+      "^react-native-url-polyfill/auto$": "<rootDir>/__mocks__/react-native-url-polyfill-auto.js",
+      "^expo/src/winter$": "<rootDir>/__mocks__/expo-winter.js",
+      "^expo/virtual/rsc$": "<rootDir>/__mocks__/expo-virtual-rsc.js"
+    },
     "transformIgnorePatterns": [
       "node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|@rnmapbox/.*|react-native-url-polyfill|@supabase/.*|@react-native-async-storage/.*))"
     ]
