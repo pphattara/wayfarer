@@ -6,6 +6,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
     "ios": {
       "bundleIdentifier": "com.wayfarer.app",
       "supportsTablet": false,
@@ -16,10 +17,7 @@
     "plugins": [
       "expo-router",
       "expo-dev-client",
-      [
-        "@rnmapbox/maps",
-        { "RNMapboxMapsDownloadToken": "YOUR_MAPBOX_SECRET_TOKEN" }
-      ],
+      "@rnmapbox/maps",
       "expo-apple-authentication",
       [
         "expo-location",
