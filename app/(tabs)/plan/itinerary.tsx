@@ -46,7 +46,10 @@ export default function ItineraryScreen() {
         }
       )
 
-      const reader = res.body!.getReader()
+      if (!res.ok) throw new Error(`Itinerary generation failed: ${res.status}`)
+      if (!res.body) throw new Error('No response body from itinerary service')
+
+      const reader = res.body.getReader()
       const decoder = new TextDecoder()
       let buffer = ''
 

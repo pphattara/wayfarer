@@ -24,6 +24,8 @@ export default function PackingScreen() {
         .eq('id', tripId)
         .single()
 
+      if (!trip) throw new Error('Trip not found')
+
       const forecastData = await fetchForecast(destination, trip.start_date, trip.end_date)
       setForecast(forecastData)
 

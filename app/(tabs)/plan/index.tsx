@@ -21,7 +21,8 @@ export default function TripSetupScreen() {
     if (!destination.trim()) return 'Please enter a destination.'
     if (!startDate.match(/^\d{4}-\d{2}-\d{2}$/)) return 'Start date must be YYYY-MM-DD.'
     if (!endDate.match(/^\d{4}-\d{2}-\d{2}$/)) return 'End date must be YYYY-MM-DD.'
-    if (new Date(startDate) < new Date()) return 'Start date cannot be in the past.'
+    const today = new Date(); today.setHours(0, 0, 0, 0)
+    if (new Date(startDate) < today) return 'Start date cannot be in the past.'
     if (new Date(endDate) <= new Date(startDate)) return 'End date must be after start date.'
     return null
   }

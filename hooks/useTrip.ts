@@ -10,9 +10,10 @@ export function useTrip() {
     end_date: string
   }): Promise<Trip> {
     const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Not authenticated')
     const { data, error } = await supabase
       .from('trips')
-      .insert({ ...params, user_id: user!.id })
+      .insert({ ...params, user_id: user.id })
       .select()
       .single()
     if (error) throw error

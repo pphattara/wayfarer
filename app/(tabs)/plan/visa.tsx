@@ -71,11 +71,11 @@ export default function VisaScreen() {
             </>
           )}
 
-          {visa.embassy_url && (
-            <Pressable style={styles.embassyButton} onPress={() => Linking.openURL(visa.embassy_url!)}>
+          {visa.embassy_url ? (
+            <Pressable style={styles.embassyButton} onPress={() => Linking.openURL(visa.embassy_url as string)}>
               <Text style={styles.embassyText}>Official embassy website →</Text>
             </Pressable>
-          )}
+          ) : null}
         </ScrollView>
       ) : null}
 

@@ -17,7 +17,11 @@ export async function cacheItinerary(tripId: string, days: ItineraryDay[]): Prom
 export async function getCachedItinerary(tripId: string): Promise<CachedItinerary | null> {
   const raw = await AsyncStorage.getItem(KEY_PREFIX + tripId)
   if (!raw) return null
-  return JSON.parse(raw) as CachedItinerary
+  try {
+    return JSON.parse(raw) as CachedItinerary
+  } catch {
+    return null
+  }
 }
 
 export function isCacheStale(cachedAt: string): boolean {
