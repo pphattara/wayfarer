@@ -5,19 +5,21 @@ import type { Collection, Place } from '../types'
 export function useCollections() {
   async function getCollections(): Promise<Collection[]> {
     const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Not authenticated')
     const { data, error } = await supabase
       .from('collections')
       .select('*')
-      .eq('user_id', user!.id)
+      .eq('user_id', user.id)
     if (error) throw error
     return data as Collection[]
   }
 
   async function createCollection(name: string): Promise<Collection> {
     const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Not authenticated')
     const { data, error } = await supabase
       .from('collections')
-      .insert({ name, user_id: user!.id })
+      .insert({ name, user_id: user.id })
       .select()
       .single()
     if (error) throw error
@@ -26,11 +28,12 @@ export function useCollections() {
 
   async function saveToCollection(collectionId: string, place: Omit<Place, 'id' | 'created_by'>): Promise<void> {
     const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Not authenticated')
 
     // Upsert place
     const { data: placeData, error: placeError } = await supabase
       .from('places')
-      .upsert({ ...place, created_by: user!.id }, { onConflict: 'mapbox_id' })
+      .upsert({ ...place, created_by: user.id }, { onConflict: 'mapbox_id' })
       .select()
       .single()
     if (placeError) throw placeError
@@ -38,7 +41,7 @@ export function useCollections() {
     // Add to collection (ignore duplicate)
     await supabase
       .from('collection_places')
-      .insert({ collection_id: collectionId, place_id: placeData.id })
+      .upsert({ collection_id: collectionId, place_id: placeData.id }, { ignoreDuplicates: true })
       .throwOnError()
   }
 
