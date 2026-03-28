@@ -13,8 +13,13 @@ export default function HomeTab() {
   const { getUserTrips } = useTrip()
   const [trips, setTrips] = useState<Trip[]>([])
 
+  const [loading, setLoading] = useState(true)
+
   useEffect(() => {
-    getUserTrips().then(setTrips).catch(() => {})
+    getUserTrips()
+      .then(setTrips)
+      .catch((err) => console.error('Failed to load trips:', err))
+      .finally(() => setLoading(false))
   }, [])
 
   const upcoming = trips.filter(t => new Date(t.start_date) >= new Date())
@@ -24,7 +29,9 @@ export default function HomeTab() {
       <Text style={styles.greeting}>Hey{user?.display_name ? `, ${user.display_name}` : ''} 👋</Text>
       <Text style={styles.heading}>Your trips</Text>
 
-      {upcoming.length === 0 ? (
+      {loading ? (
+        <Text style={styles.emptySubtitle}>Loading…</Text>
+      ) : upcoming.length === 0 ? (
         <View style={styles.emptyState}>
           <Text style={styles.emptyTitle}>No trips planned yet</Text>
           <Text style={styles.emptySubtitle}>Use the Plan tab to create your first trip with AI.</Text>
