@@ -13,17 +13,16 @@ export default function ProfileTab() {
   async function saveProfile() {
     if (!user) return
     setSaving(true)
-    const { error } = await supabase
-      .from('users')
-      .update({ nationality, display_name: displayName })
-      .eq('id', user.id)
-    setSaving(false)
-    if (error) Alert.alert('Error', error.message)
-    else Alert.alert('Saved', 'Profile updated.')
-  }
-
-  async function handleSignOut() {
-    await signOut()
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({ nationality, display_name: displayName })
+        .eq('id', user.id)
+      if (error) Alert.alert('Error', error.message)
+      else Alert.alert('Saved', 'Profile updated.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -41,7 +40,7 @@ export default function ProfileTab() {
         <Text style={styles.saveText}>{saving ? 'Saving…' : 'Save changes'}</Text>
       </Pressable>
 
-      <Pressable style={styles.signOutButton} onPress={handleSignOut}>
+      <Pressable style={styles.signOutButton} onPress={signOut}>
         <Text style={styles.signOutText}>Sign out</Text>
       </Pressable>
     </ScrollView>
