@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { View, Text, TextInput, StyleSheet, Pressable, Alert, ScrollView } from 'react-native'
 import { useRouter } from 'expo-router'
+import { LinearGradient } from 'expo-linear-gradient'
 import { useTrip } from '../../../hooks/useTrip'
 import { useAuth } from '../../../hooks/useAuth'
 
@@ -47,36 +48,79 @@ export default function TripSetupScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.step}>Step 1 of 6</Text>
-      <Text style={styles.title}>Where are you going?</Text>
+    <ScrollView style={styles.screen} contentContainerStyle={styles.scrollContent}>
+      <LinearGradient
+        colors={['#0EA5E9', '#0284C7']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={styles.header}
+      >
+        <Text style={styles.step}>Step 1 of 6</Text>
+        <Text style={styles.title}>Where are you going?</Text>
+      </LinearGradient>
 
-      <Text style={styles.label}>From</Text>
-      <TextInput style={styles.input} placeholder="London, UK" value={origin} onChangeText={setOrigin} />
+      <View style={styles.formCard}>
+        <Text style={styles.label}>From</Text>
+        <TextInput style={styles.input} placeholder="London, UK" value={origin} onChangeText={setOrigin} />
 
-      <Text style={styles.label}>Destination</Text>
-      <TextInput style={styles.input} placeholder="Rome, Italy" value={destination} onChangeText={setDestination} />
+        <Text style={styles.label}>Destination</Text>
+        <TextInput style={styles.input} placeholder="Rome, Italy" value={destination} onChangeText={setDestination} />
 
-      <Text style={styles.label}>Departure date (YYYY-MM-DD)</Text>
-      <TextInput style={styles.input} placeholder="2026-05-01" value={startDate} onChangeText={setStartDate} keyboardType="numbers-and-punctuation" />
+        <Text style={styles.label}>Departure date</Text>
+        <TextInput style={styles.input} placeholder="e.g. 2026-05-01" value={startDate} onChangeText={setStartDate} keyboardType="numbers-and-punctuation" />
 
-      <Text style={styles.label}>Return date (YYYY-MM-DD)</Text>
-      <TextInput style={styles.input} placeholder="2026-05-07" value={endDate} onChangeText={setEndDate} keyboardType="numbers-and-punctuation" />
+        <Text style={styles.label}>Return date</Text>
+        <TextInput style={styles.input} placeholder="e.g. 2026-05-07" value={endDate} onChangeText={setEndDate} keyboardType="numbers-and-punctuation" />
 
-      <Pressable style={[styles.button, loading && styles.buttonDisabled]} onPress={handleNext} disabled={loading}>
-        <Text style={styles.buttonText}>{loading ? 'Creating trip...' : 'Next \u2192'}</Text>
-      </Pressable>
+        <Pressable style={[styles.button, loading && styles.buttonDisabled]} onPress={handleNext} disabled={loading}>
+          <Text style={styles.buttonText}>{loading ? 'Creating trip...' : 'Next \u2192'}</Text>
+        </Pressable>
+      </View>
     </ScrollView>
   )
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 24, paddingTop: 60 },
-  step: { fontSize: 13, color: '#0F6E56', fontWeight: '600', marginBottom: 4 },
-  title: { fontSize: 28, fontWeight: '800', color: '#111', marginBottom: 32 },
-  label: { fontSize: 14, fontWeight: '600', color: '#444', marginBottom: 6 },
-  input: { backgroundColor: '#f5f5f5', borderRadius: 12, padding: 14, fontSize: 16, marginBottom: 20, borderWidth: 1, borderColor: '#eee' },
-  button: { backgroundColor: '#0F6E56', borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 8 },
-  buttonDisabled: { opacity: 0.6 },
+  screen: { flex: 1, backgroundColor: '#F0F9FF' },
+  scrollContent: { paddingBottom: 40 },
+  header: {
+    paddingTop: 60,
+    paddingBottom: 24,
+    paddingHorizontal: 24,
+    width: '100%',
+  },
+  step: { fontSize: 13, color: 'rgba(255,255,255,0.85)', fontWeight: '600', marginBottom: 6 },
+  title: { fontSize: 28, fontWeight: '800', color: '#fff' },
+  formCard: {
+    margin: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  label: { fontSize: 14, fontWeight: '600', color: '#0C4A6E', marginBottom: 6 },
+  input: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+  },
+  button: {
+    backgroundColor: '#F97316',
+    borderRadius: 16,
+    height: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+    width: '100%',
+  },
+  buttonDisabled: { opacity: 0.5 },
   buttonText: { color: '#fff', fontSize: 17, fontWeight: '700' },
 })
