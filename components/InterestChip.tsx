@@ -22,8 +22,19 @@ export function InterestChip({ label, emoji, selected, onPress }: Props) {
 }
 
 const styles = StyleSheet.create({
-  chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1.5, borderColor: '#ddd', backgroundColor: '#f9f9f9', margin: 4 },
-  chipSelected: { borderColor: '#0F6E56', backgroundColor: '#e8f5f0' },
-  text: { fontSize: 14, color: '#555', fontWeight: '500' },
-  textSelected: { color: '#0F6E56', fontWeight: '700' },
+  chip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.12)',
+    backgroundColor: '#f5f5f2',
+    margin: 4,
+  },
+  chipSelected: {
+    borderColor: '#0F6E56',
+    backgroundColor: '#E1F5EE',
+  },
+  text: { fontSize: 9, color: '#6b6b66', fontWeight: '500' },
+  textSelected: { color: '#0F6E56', fontWeight: '600' },
 })
