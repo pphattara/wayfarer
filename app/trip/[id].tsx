@@ -1,6 +1,6 @@
 // app/trip/[id].tsx
 import { useEffect, useState } from 'react'
-import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from 'react-native'
+import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { supabase } from '../../lib/supabase'
 import { getCachedItinerary, isCacheStale } from '../../lib/offline'
@@ -25,14 +25,16 @@ export default function TripDetailScreen() {
     }
 
     // Fetch trip metadata
-    const { data: tripData } = await supabase
+    const { data: tripData, error: tripError } = await supabase
       .from('trips').select('*').eq('id', id).single()
+    if (tripError) console.error('Failed to load trip:', tripError)
     if (tripData) setTrip(tripData as Trip)
 
     // Fetch fresh itinerary from DB if not cached
     if (!cached) {
-      const { data: dayData } = await supabase
+      const { data: dayData, error: dayError } = await supabase
         .from('itinerary_days').select('*').eq('trip_id', id).order('day_number')
+      if (dayError) console.error('Failed to load itinerary:', dayError)
       if (dayData) setDays(dayData as IDay[])
     }
   }
