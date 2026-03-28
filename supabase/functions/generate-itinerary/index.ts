@@ -13,6 +13,13 @@ serve(async (req) => {
 
   const { origin, destinations, start_date, end_date, interests } = await req.json()
 
+  if (!origin || !Array.isArray(destinations) || !start_date || !end_date || !Array.isArray(interests)) {
+    return new Response(
+      JSON.stringify({ error: 'origin, destinations[], start_date, end_date, and interests[] are required' }),
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+
   const days = Math.ceil(
     (new Date(end_date).getTime() - new Date(start_date).getTime()) / (1000 * 60 * 60 * 24)
   ) + 1
@@ -46,11 +53,15 @@ Return only valid JSON array, no markdown.`,
   const encoder = new TextEncoder()
   const readable = new ReadableStream({
     async start(controller) {
-      for await (const chunk of stream) {
-        const text = chunk.choices[0]?.delta?.content ?? ''
-        if (text) controller.enqueue(encoder.encode(text))
+      try {
+        for await (const chunk of stream) {
+          const text = chunk.choices[0]?.delta?.content ?? ''
+          if (text) controller.enqueue(encoder.encode(text))
+        }
+        controller.close()
+      } catch (e) {
+        controller.error(e)
       }
-      controller.close()
     },
   })
 

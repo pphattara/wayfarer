@@ -12,6 +12,13 @@ serve(async (req) => {
 
   const { nationality, destination } = await req.json()
 
+  if (!nationality || !destination) {
+    return new Response(
+      JSON.stringify({ error: 'nationality and destination are required' }),
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+
   const response = await openai.chat.completions.create({
     model: 'gpt-4o',
     messages: [{
@@ -34,7 +41,15 @@ Return only valid JSON, no markdown.`
     max_tokens: 1000,
   })
 
-  const content = JSON.parse(response.choices[0].message.content ?? '{}')
+  let content: Record<string, unknown>
+  try {
+    content = JSON.parse(response.choices[0].message.content ?? '{}')
+  } catch {
+    return new Response(
+      JSON.stringify({ error: 'Failed to parse AI response. Please try again.' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
   return new Response(JSON.stringify(content), {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })

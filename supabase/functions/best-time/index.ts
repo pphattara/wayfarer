@@ -7,16 +7,22 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
+const supabase = createClient(
+  Deno.env.get('SUPABASE_URL')!,
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+)
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
   const { destination } = await req.json()
 
-  const supabase = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-  )
+  if (!destination) {
+    return new Response(
+      JSON.stringify({ error: 'destination is required' }),
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
 
   // Check cache first (7-day TTL)
   const { data: cached } = await supabase
@@ -53,7 +59,15 @@ Return only valid JSON, no markdown.`
     max_tokens: 1500,
   })
 
-  const content = JSON.parse(response.choices[0].message.content ?? '{}')
+  let content: Record<string, unknown>
+  try {
+    content = JSON.parse(response.choices[0].message.content ?? '{}')
+  } catch {
+    return new Response(
+      JSON.stringify({ error: 'Failed to parse AI response. Please try again.' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
 
   // Upsert cache
   await supabase.from('best_time_cache').upsert({

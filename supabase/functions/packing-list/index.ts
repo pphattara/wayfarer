@@ -11,6 +11,20 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
   const { destination, start_date, end_date, forecast } = await req.json()
+
+  if (!Array.isArray(forecast)) {
+    return new Response(
+      JSON.stringify({ error: 'forecast must be an array' }),
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+  if (!start_date || !end_date) {
+    return new Response(
+      JSON.stringify({ error: 'start_date and end_date are required' }),
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+
   const days = Math.ceil(
     (new Date(end_date).getTime() - new Date(start_date).getTime()) / (1000 * 60 * 60 * 24)
   ) + 1
@@ -39,7 +53,13 @@ Return only valid JSON, no markdown.`
     max_tokens: 800,
   })
 
-  const packing_list = JSON.parse(response.choices[0].message.content ?? '[]')
+  let packing_list: unknown[]
+  try {
+    packing_list = JSON.parse(response.choices[0].message.content ?? '[]')
+    if (!Array.isArray(packing_list)) packing_list = []
+  } catch {
+    packing_list = []
+  }
   return new Response(JSON.stringify({ packing_list }), {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
