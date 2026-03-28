@@ -26,14 +26,13 @@ export default function HomeTab() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
-      <Text style={styles.greeting}>Hey{user?.display_name ? `, ${user.display_name}` : ''}</Text>
+      <Text style={styles.greeting}>Hey{user?.display_name ? `, ${user.display_name}` : ''} 👋</Text>
       <Text style={styles.heading}>Your trips</Text>
 
       {loading ? (
         <Text style={styles.emptySubtitle}>Loading…</Text>
       ) : upcoming.length === 0 ? (
         <View style={styles.emptyState}>
-          <View style={styles.emptyIcon} />
           <Text style={styles.emptyTitle}>No trips planned yet</Text>
           <Text style={styles.emptySubtitle}>Use the Plan tab to create your first trip with AI.</Text>
           <Pressable style={styles.ctaButton} onPress={() => router.push('/(tabs)/plan')}>
@@ -48,13 +47,12 @@ export default function HomeTab() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F0F9FF', padding: 24, paddingTop: 60 },
-  greeting: { fontSize: 15, color: '#94A3B8', marginBottom: 4 },
-  heading: { fontSize: 28, fontWeight: '800', color: '#0C4A6E', marginBottom: 24 },
+  container: { flex: 1, backgroundColor: '#f8f8f8', padding: 24, paddingTop: 60 },
+  greeting: { fontSize: 15, color: '#888', marginBottom: 4 },
+  heading: { fontSize: 28, fontWeight: '800', color: '#111', marginBottom: 24 },
   emptyState: { alignItems: 'center', paddingVertical: 48 },
-  emptyIcon: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#E0F2FE', marginBottom: 20 },
-  emptyTitle: { fontSize: 18, fontWeight: '700', color: '#0C4A6E', marginBottom: 8 },
-  emptySubtitle: { fontSize: 15, color: '#64748B', textAlign: 'center', marginBottom: 24, lineHeight: 22 },
-  ctaButton: { backgroundColor: '#F97316', borderRadius: 16, paddingHorizontal: 28, height: 52, alignItems: 'center', justifyContent: 'center' },
+  emptyTitle: { fontSize: 18, fontWeight: '700', color: '#333', marginBottom: 8 },
+  emptySubtitle: { fontSize: 15, color: '#888', textAlign: 'center', marginBottom: 24, lineHeight: 22 },
+  ctaButton: { backgroundColor: '#0F6E56', borderRadius: 14, paddingHorizontal: 28, paddingVertical: 14 },
   ctaText: { color: '#fff', fontWeight: '700', fontSize: 16 },
 })

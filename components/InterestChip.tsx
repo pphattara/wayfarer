@@ -15,26 +15,15 @@ export function InterestChip({ label, emoji, selected, onPress }: Props) {
       onPress={onPress}
     >
       <Text style={[styles.text, selected && styles.textSelected]}>
-        {label}
+        {emoji} {label}
       </Text>
     </Pressable>
   )
 }
 
 const styles = StyleSheet.create({
-  chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: '#CBD5E1',
-    backgroundColor: '#F8FAFC',
-    margin: 4,
-  },
-  chipSelected: {
-    borderColor: '#0EA5E9',
-    backgroundColor: '#E0F2FE',
-  },
-  text: { fontSize: 14, color: '#475569', fontWeight: '500' },
-  textSelected: { color: '#0EA5E9', fontWeight: '700' },
+  chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1.5, borderColor: '#ddd', backgroundColor: '#f9f9f9', margin: 4 },
+  chipSelected: { borderColor: '#0F6E56', backgroundColor: '#e8f5f0' },
+  text: { fontSize: 14, color: '#555', fontWeight: '500' },
+  textSelected: { color: '#0F6E56', fontWeight: '700' },
 })

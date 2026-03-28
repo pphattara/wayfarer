@@ -4,7 +4,6 @@ import { useState } from 'react'
 import * as AppleAuthentication from 'expo-apple-authentication'
 import * as WebBrowser from 'expo-web-browser'
 import { makeRedirectUri } from 'expo-auth-session'
-import { LinearGradient } from 'expo-linear-gradient'
 import { supabase } from '../lib/supabase'
 
 WebBrowser.maybeCompleteAuthSession()
@@ -63,22 +62,17 @@ export default function AuthScreen() {
   }
 
   return (
-    <LinearGradient
-      colors={['#0EA5E9', '#0C4A6E']}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 0, y: 1 }}
-      style={styles.container}
-    >
+    <View style={styles.container}>
       <Text style={styles.logo}>Wayfarer</Text>
       <Text style={styles.tagline}>Plan your next adventure</Text>
 
       {loading ? (
-        <ActivityIndicator color="#fff" style={{ marginTop: 32 }} />
+        <ActivityIndicator color="#0F6E56" style={{ marginTop: 32 }} />
       ) : (
         <View style={styles.buttons}>
           <AppleAuthentication.AppleAuthenticationButton
             buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
-            buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE}
+            buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
             cornerRadius={12}
             style={styles.appleButton}
             onPress={signInWithApple}
@@ -88,16 +82,16 @@ export default function AuthScreen() {
           </Pressable>
         </View>
       )}
-    </LinearGradient>
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
-  logo: { fontSize: 42, fontWeight: '800', color: '#fff', letterSpacing: -1 },
-  tagline: { fontSize: 16, color: 'rgba(255,255,255,0.8)', marginTop: 8, marginBottom: 48 },
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff', padding: 32 },
+  logo: { fontSize: 40, fontWeight: '800', color: '#0F6E56', letterSpacing: -1 },
+  tagline: { fontSize: 16, color: '#666', marginTop: 8, marginBottom: 48 },
   buttons: { width: '100%', gap: 12 },
   appleButton: { width: '100%', height: 52 },
-  googleButton: { width: '100%', height: 52, backgroundColor: '#fff', borderRadius: 12, borderWidth: 1.5, borderColor: '#0EA5E9', alignItems: 'center', justifyContent: 'center' },
-  googleText: { fontSize: 16, fontWeight: '600', color: '#0C4A6E' },
+  googleButton: { width: '100%', height: 52, backgroundColor: '#fff', borderRadius: 12, borderWidth: 1.5, borderColor: '#ddd', alignItems: 'center', justifyContent: 'center' },
+  googleText: { fontSize: 16, fontWeight: '600', color: '#333' },
 })
