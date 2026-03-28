@@ -10,9 +10,11 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (loading) return
-    const inAuthGroup = segments[0] === '(tabs)'
-    if (!session && inAuthGroup) router.replace('/auth')
-    if (session && !inAuthGroup) router.replace('/(tabs)')
+    const inTabsGroup = segments[0] === '(tabs)'
+    const isAuthRoute = segments[0] === 'auth'
+
+    if (!session && inTabsGroup) router.replace('/auth')
+    if (session && !inTabsGroup && !isAuthRoute) router.replace('/(tabs)')
   }, [session, loading, segments])
 
   return <Slot />

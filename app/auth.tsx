@@ -20,9 +20,10 @@ export default function AuthScreen() {
           AppleAuthentication.AppleAuthenticationScope.EMAIL,
         ],
       })
+      if (!credential.identityToken) throw new Error('Apple did not return an identity token')
       const { error } = await supabase.auth.signInWithIdToken({
         provider: 'apple',
-        token: credential.identityToken!,
+        token: credential.identityToken,
       })
       if (error) Alert.alert('Sign in failed', error.message)
     } catch (e: any) {
@@ -41,11 +42,14 @@ export default function AuthScreen() {
         options: { redirectTo: redirectUrl, skipBrowserRedirect: true },
       })
       if (error) throw error
-      const result = await WebBrowser.openAuthSessionAsync(data.url!, redirectUrl)
+      if (!data.url) throw new Error('OAuth URL missing — check Supabase provider config')
+      const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl)
       if (result.type === 'success') {
-        const url = new URL(result.url)
-        const access_token = url.searchParams.get('access_token')
-        const refresh_token = url.searchParams.get('refresh_token')
+        // Supabase implicit flow returns tokens in hash fragment
+        const hash = new URL(result.url).hash.slice(1)
+        const params = new URLSearchParams(hash)
+        const access_token = params.get('access_token')
+        const refresh_token = params.get('refresh_token')
         if (access_token && refresh_token) {
           await supabase.auth.setSession({ access_token, refresh_token })
         }
