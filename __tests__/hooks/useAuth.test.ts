@@ -5,7 +5,6 @@ import { renderHook, act } from '@testing-library/react-native'
 jest.mock('../../lib/supabase', () => ({
   supabase: {
     auth: {
-      getSession: jest.fn().mockResolvedValue({ data: { session: null } }),
       onAuthStateChange: jest.fn().mockReturnValue({
         data: { subscription: { unsubscribe: jest.fn() } },
       }),
@@ -21,11 +20,30 @@ jest.mock('../../lib/supabase', () => ({
 
 import { useAuth } from '../../hooks/useAuth'
 
+const getMockOnAuthStateChange = () =>
+  require('../../lib/supabase').supabase.auth.onAuthStateChange as jest.Mock
+
+beforeEach(() => {
+  getMockOnAuthStateChange().mockClear()
+})
+
 describe('useAuth', () => {
-  it('initialises with null session and loading true', async () => {
+  it('initialises with null session, null user, and loading true', () => {
     const { result } = renderHook(() => useAuth())
     expect(result.current.session).toBeNull()
     expect(result.current.user).toBeNull()
+    expect(result.current.loading).toBe(true)
+  })
+
+  it('sets loading false after INITIAL_SESSION fires', async () => {
+    const { result } = renderHook(() => useAuth())
+    // After renderHook the hook has registered its listener — grab the callback
+    const callback = getMockOnAuthStateChange().mock.calls[0][0]
+    await act(async () => {
+      callback('INITIAL_SESSION', null)
+    })
+    expect(result.current.loading).toBe(false)
+    expect(result.current.session).toBeNull()
   })
 
   it('exposes a signOut function', () => {
