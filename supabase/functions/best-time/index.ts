@@ -2,7 +2,10 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import OpenAI from 'https://deno.land/x/openai@v4.28.0/mod.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const openai = new OpenAI({ apiKey: Deno.env.get('OPENAI_API_KEY')! })
+const openai = new OpenAI({
+  apiKey: Deno.env.get('GROQ_API_KEY')!,
+  baseURL: 'https://api.groq.com/openai/v1',
+})
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -41,7 +44,7 @@ serve(async (req) => {
   }
 
   const response = await openai.chat.completions.create({
-    model: 'gpt-4o',
+    model: 'llama-3.3-70b-versatile',
     messages: [{
       role: 'user',
       content: `Analyse the best time to visit ${destination} for tourists.

@@ -1,5 +1,6 @@
 // lib/offline.ts
-import AsyncStorage from '@react-native-async-storage/async-storage'
+// Uses expo-file-system instead of AsyncStorage (AsyncStorage requires native build)
+import * as FileSystem from 'expo-file-system'
 import type { ItineraryDay } from '../types'
 
 interface CachedItinerary {
@@ -7,17 +8,22 @@ interface CachedItinerary {
   cachedAt: string
 }
 
-const KEY_PREFIX = '@wayfarer:itinerary:'
+function cachePath(tripId: string): string {
+  return `${FileSystem.cacheDirectory}wayfarer_itinerary_${tripId}.json`
+}
 
 export async function cacheItinerary(tripId: string, days: ItineraryDay[]): Promise<void> {
-  const value: CachedItinerary = { days, cachedAt: new Date().toISOString() }
-  await AsyncStorage.setItem(KEY_PREFIX + tripId, JSON.stringify(value))
+  try {
+    const value: CachedItinerary = { days, cachedAt: new Date().toISOString() }
+    await FileSystem.writeAsStringAsync(cachePath(tripId), JSON.stringify(value))
+  } catch {
+    // caching is best-effort — don't crash the app
+  }
 }
 
 export async function getCachedItinerary(tripId: string): Promise<CachedItinerary | null> {
-  const raw = await AsyncStorage.getItem(KEY_PREFIX + tripId)
-  if (!raw) return null
   try {
+    const raw = await FileSystem.readAsStringAsync(cachePath(tripId))
     return JSON.parse(raw) as CachedItinerary
   } catch {
     return null

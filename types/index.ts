@@ -2,17 +2,30 @@
 
 export type TripStatus = 'planning' | 'confirmed' | 'completed'
 
+export interface UserVisa {
+  country: string
+  expiry: string // MM/YYYY
+}
+
 export interface User {
   id: string
   email: string
-  nationality: string
   display_name: string
   avatar_url: string | null
+  // Primary passport
+  nationality: string
+  passport_expiry: string | null  // MM/YYYY
+  // Second passport (optional)
+  passport2_nationality: string | null
+  passport2_expiry: string | null // MM/YYYY
+  // Existing visas
+  visas: UserVisa[]
 }
 
 export interface Trip {
   id: string
   user_id: string
+  trip_name: string | null
   origin: string
   destinations: string[]
   start_date: string        // ISO date string YYYY-MM-DD
@@ -34,6 +47,7 @@ export interface ItineraryItem {
   time: string
   notes: string
   duration_minutes?: number
+  transport_to_next?: string  // e.g. "Walk 10 min", "Take BTS Skytrain 3 stops"
 }
 
 export interface VisaSummary {

@@ -49,6 +49,9 @@ export default function PackingScreen() {
 
   return (
     <View style={styles.container}>
+      <Pressable onPress={() => router.back()} style={styles.backBtn}>
+        <Text style={styles.backBtnText}>← Back</Text>
+      </Pressable>
       <Text style={styles.step}>Step 6 of 6</Text>
       <Text style={styles.title}>Pack & weather</Text>
       <Text style={styles.subtitle}>{destination}</Text>
@@ -85,7 +88,15 @@ export default function PackingScreen() {
       )}
 
       <View style={styles.footer}>
-        <Pressable style={styles.doneButton} onPress={() => router.replace(`/trip/${tripId}`)}>
+        <Pressable
+          style={styles.doneButton}
+          onPress={() => {
+            // Pop back to the tab root first, then push trip detail
+            // so the wizard stack is cleared
+            router.dismissAll()
+            router.push(`/trip/${tripId}`)
+          }}
+        >
           <Text style={styles.doneText}>View my trip ✓</Text>
         </Pressable>
       </View>
@@ -95,6 +106,8 @@ export default function PackingScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f8f8', padding: 24, paddingTop: 60 },
+  backBtn: { marginBottom: 8 },
+  backBtnText: { fontSize: 15, color: '#0F6E56', fontWeight: '600' },
   step: { fontSize: 13, color: '#0F6E56', fontWeight: '600', marginBottom: 4 },
   title: { fontSize: 28, fontWeight: '800', color: '#111', marginBottom: 4 },
   subtitle: { fontSize: 15, color: '#888', marginBottom: 24 },

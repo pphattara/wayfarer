@@ -9,23 +9,32 @@ import type { VisaSummary } from '../../../types'
 export default function VisaScreen() {
   const { tripId, destination } = useLocalSearchParams<{ tripId: string; destination: string }>()
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const [visa, setVisa] = useState<Partial<VisaSummary> | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => { fetchVisa() }, [])
+  useEffect(() => {
+    if (authLoading) return  // wait for auth to resolve
+    if (!user) {
+      Alert.alert('Error', 'You must be signed in to check visa requirements.')
+      setLoading(false)
+      return
+    }
+    fetchVisa()
+  }, [authLoading, user])
 
   async function fetchVisa() {
+    if (!user) return
     setLoading(true)
     try {
       const { data, error } = await supabase.functions.invoke('visa-check', {
-        body: { nationality: user?.nationality || 'Unknown', destination },
+        body: { nationality: user.nationality || 'Unknown', destination },
       })
       if (error) throw error
       setVisa(data)
       await supabase.from('visa_summaries').insert({
         trip_id: tripId,
-        nationality: user?.nationality || 'Unknown',
+        nationality: user.nationality || 'Unknown',
         destination,
         content: data,
       })
@@ -38,13 +47,18 @@ export default function VisaScreen() {
 
   return (
     <View style={styles.container}>
+      <Pressable onPress={() => router.back()} style={styles.backBtn}>
+        <Text style={styles.backBtnText}>← Back</Text>
+      </Pressable>
       <Text style={styles.step}>Step 5 of 6</Text>
       <Text style={styles.title}>Visa & documents</Text>
       <Text style={styles.subtitle}>{user?.nationality} → {destination}</Text>
 
       {loading ? (
         <ActivityIndicator color="#0F6E56" size="large" style={{ marginTop: 40 }} />
-      ) : visa ? (
+      ) : !visa ? (
+        <ActivityIndicator color="#0F6E56" size="large" style={{ marginTop: 40 }} />
+      ) : (
         <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 100 }}>
           <View style={styles.card}>
             <Text style={styles.visaType}>{visa.visa_type}</Text>
@@ -77,7 +91,7 @@ export default function VisaScreen() {
             </Pressable>
           ) : null}
         </ScrollView>
-      ) : null}
+      )}
 
       <View style={styles.footer}>
         <Pressable style={styles.nextButton} onPress={() => router.push({ pathname: '/(tabs)/plan/packing', params: { tripId, destination } })}>
@@ -90,6 +104,8 @@ export default function VisaScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f8f8', padding: 24, paddingTop: 60 },
+  backBtn: { marginBottom: 8 },
+  backBtnText: { fontSize: 15, color: '#0F6E56', fontWeight: '600' },
   step: { fontSize: 13, color: '#0F6E56', fontWeight: '600', marginBottom: 4 },
   title: { fontSize: 28, fontWeight: '800', color: '#111', marginBottom: 4 },
   subtitle: { fontSize: 15, color: '#888', marginBottom: 24 },

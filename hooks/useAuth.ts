@@ -8,19 +8,25 @@ export function useAuth() {
   const [session, setSession] = useState<Session | null>(null)
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [profileLoading, setProfileLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   async function fetchProfile(userId: string) {
-    const { data, error: fetchError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .single()
-    if (fetchError) {
-      console.warn('fetchProfile error:', fetchError.message)
-      setError(fetchError.message)
-    } else if (data) {
-      setUser(data as User)
+    setProfileLoading(true)
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single()
+      if (fetchError) {
+        console.warn('fetchProfile error:', fetchError.message)
+        setError(fetchError.message)
+      } else if (data) {
+        setUser(data as User)
+      }
+    } finally {
+      setProfileLoading(false)
     }
   }
 
@@ -31,6 +37,7 @@ export function useAuth() {
         fetchProfile(newSession.user.id)
       } else {
         setUser(null)
+        setProfileLoading(false)
       }
       setLoading(false)
     })
@@ -43,5 +50,5 @@ export function useAuth() {
     if (signOutError) throw signOutError
   }
 
-  return { session, user, loading, error, signOut }
+  return { session, user, loading, profileLoading, error, signOut }
 }
