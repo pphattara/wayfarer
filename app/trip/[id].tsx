@@ -1,12 +1,13 @@
 // app/trip/[id].tsx
 import { useEffect, useState } from 'react'
-import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, Alert } from 'react-native'
+import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, Alert, Modal, KeyboardAvoidingView, TextInput, Platform, TouchableOpacity } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { supabase } from '../../lib/supabase'
 import { getCachedItinerary, isCacheStale } from '../../lib/offline'
 import { useTrip } from '../../hooks/useTrip'
 import { ItineraryDay } from '../../components/ItineraryDay'
 import { ShareTripModal } from '../../components/ShareTripModal'
+import { useCreatorRoutes } from '../../hooks/useCreatorRoutes'
 import type { Trip, ItineraryDay as IDay, ItineraryItem } from '../../types'
 
 export default function TripDetailScreen() {
@@ -20,6 +21,11 @@ export default function TripDetailScreen() {
   const [saving, setSaving] = useState(false)
   const [enhancing, setEnhancing] = useState(false)
   const [shareModalVisible, setShareModalVisible] = useState(false)
+  const { publishRoute } = useCreatorRoutes()
+  const [publishModalVisible, setPublishModalVisible] = useState(false)
+  const [routeTitle, setRouteTitle] = useState('')
+  const [routeSummary, setRouteSummary] = useState('')
+  const [publishing, setPublishing] = useState(false)
 
   useEffect(() => { loadTrip() }, [])
 
@@ -196,6 +202,13 @@ export default function TripDetailScreen() {
         >
           <Text style={styles.shareBtnText}>Share This Trip</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.publishBtn}
+          onPress={() => setPublishModalVisible(true)}
+          accessibilityLabel="Publish as Creator Route"
+        >
+          <Text style={styles.publishBtnText}>Publish as Creator Route</Text>
+        </TouchableOpacity>
       </ScrollView>
       <ShareTripModal
         visible={shareModalVisible}
@@ -204,6 +217,55 @@ export default function TripDetailScreen() {
         onClose={() => setShareModalVisible(false)}
         onPosted={() => setShareModalVisible(false)}
       />
+      <Modal
+        visible={publishModalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setPublishModalVisible(false)}
+      >
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <View style={styles.publishModalHeader}>
+            <TouchableOpacity onPress={() => setPublishModalVisible(false)} accessibilityLabel="Cancel">
+              <Text style={styles.publishModalCancel}>Cancel</Text>
+            </TouchableOpacity>
+            <Text style={styles.publishModalTitle}>Publish Route</Text>
+            <TouchableOpacity
+              disabled={publishing || !routeTitle.trim()}
+              onPress={async () => {
+                setPublishing(true)
+                await publishRoute(trip!.id, routeTitle.trim(), routeSummary.trim(), [])
+                setPublishing(false)
+                setPublishModalVisible(false)
+              }}
+              accessibilityLabel="Publish route"
+            >
+              {publishing
+                ? <ActivityIndicator color="#0F6E56" />
+                : <Text style={[styles.publishModalPost, !routeTitle.trim() && styles.publishModalPostDisabled]}>Publish</Text>
+              }
+            </TouchableOpacity>
+          </View>
+          <ScrollView style={{ padding: 16 }}>
+            <Text style={styles.publishFieldLabel}>Route Title</Text>
+            <TextInput
+              style={styles.publishInput}
+              placeholder="e.g. 5 Days in Tokyo"
+              value={routeTitle}
+              onChangeText={setRouteTitle}
+              accessibilityLabel="Route title"
+            />
+            <Text style={styles.publishFieldLabel}>Summary</Text>
+            <TextInput
+              style={[styles.publishInput, { minHeight: 80, textAlignVertical: 'top' }]}
+              placeholder="What makes this route special?"
+              multiline
+              value={routeSummary}
+              onChangeText={setRouteSummary}
+              accessibilityLabel="Route summary"
+            />
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </Modal>
     </View>
   )
 }
@@ -237,4 +299,35 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   shareBtnText: { color: '#fff', fontWeight: '600', fontSize: 16 },
+  publishBtn: {
+    marginHorizontal: 16,
+    marginBottom: 32,
+    borderWidth: 1,
+    borderColor: '#0F6E56',
+    borderRadius: 12,
+    padding: 14,
+    alignItems: 'center',
+  },
+  publishBtnText: { color: '#0F6E56', fontWeight: '600', fontSize: 16 },
+  publishModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#ddd',
+  },
+  publishModalTitle: { fontSize: 17, fontWeight: '600' },
+  publishModalCancel: { fontSize: 17, color: '#666' },
+  publishModalPost: { fontSize: 17, fontWeight: '600', color: '#0F6E56' },
+  publishModalPostDisabled: { color: '#aaa' },
+  publishFieldLabel: { fontSize: 13, fontWeight: '600', marginBottom: 6, marginTop: 12 },
+  publishInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    padding: 12,
+    fontSize: 15,
+    marginBottom: 8,
+  },
 })
