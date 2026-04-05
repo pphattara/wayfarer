@@ -14,6 +14,8 @@ import { cacheItinerary, getCachedItinerary, isCacheStale } from '../../lib/offl
 
 describe('offline cache', () => {
   beforeEach(async () => {
+    const FileSystem = require('expo-file-system')
+    FileSystem.__reset()
     const AsyncStorage = require('@react-native-async-storage/async-storage').default
     await AsyncStorage.clear()
   })
