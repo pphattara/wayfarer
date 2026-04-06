@@ -34,7 +34,8 @@ Return only valid JSON, no markdown.`
   const raw = response.choices[0].message.content ?? '[]'
   let chips: { label: string; emoji: string }[]
   try {
-    chips = JSON.parse(raw)
+    const cleaned = raw.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim()
+    chips = JSON.parse(cleaned)
   } catch {
     chips = [
       { label: 'Culture', emoji: '🏛' },

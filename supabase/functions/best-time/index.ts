@@ -64,7 +64,9 @@ Return only valid JSON, no markdown.`
 
   let content: Record<string, unknown>
   try {
-    content = JSON.parse(response.choices[0].message.content ?? '{}')
+    const raw = response.choices[0].message.content ?? '{}'
+    const cleaned = raw.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim()
+    content = JSON.parse(cleaned)
   } catch {
     return new Response(
       JSON.stringify({ error: 'Failed to parse AI response. Please try again.' }),

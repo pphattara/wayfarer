@@ -58,7 +58,9 @@ Return only valid JSON, no markdown.`
 
   let packing_list: unknown[]
   try {
-    packing_list = JSON.parse(response.choices[0].message.content ?? '[]')
+    const raw = response.choices[0].message.content ?? '[]'
+    const cleaned = raw.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim()
+    packing_list = JSON.parse(cleaned)
     if (!Array.isArray(packing_list)) packing_list = []
   } catch {
     packing_list = []
