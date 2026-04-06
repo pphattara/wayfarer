@@ -3,12 +3,14 @@ import { useEffect, useState } from 'react'
 import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator, Alert } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { supabase } from '../../../lib/supabase'
+import { useTrip } from '../../../hooks/useTrip'
 import { fetchForecast } from '../../../lib/openweather'
 import type { WeatherForecastDay, PackingCategory } from '../../../types'
 
 export default function PackingScreen() {
   const { tripId, destination } = useLocalSearchParams<{ tripId: string; destination: string }>()
   const router = useRouter()
+  const { updateTrip } = useTrip()
   const [forecast, setForecast] = useState<WeatherForecastDay[]>([])
   const [packing, setPacking] = useState<PackingCategory[]>([])
   const [loading, setLoading] = useState(true)
@@ -90,7 +92,18 @@ export default function PackingScreen() {
       <View style={styles.footer}>
         <Pressable
           style={styles.doneButton}
-          onPress={() => {
+          onPress={async () => {
+            // Persist weather pack and mark trip as confirmed
+            if (tripId && forecast.length > 0) {
+              await supabase.from('weather_packs').upsert({
+                trip_id: tripId,
+                forecast,
+                packing_list: packing,
+                fetched_at: new Date().toISOString(),
+              }, { onConflict: 'trip_id' }).catch(() => {})
+              // Mark trip as confirmed
+              await updateTrip(tripId, { status: 'confirmed' }).catch(() => {})
+            }
             // Pop back to the tab root first, then push trip detail
             // so the wizard stack is cleared
             router.dismissAll()

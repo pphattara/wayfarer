@@ -41,7 +41,7 @@ export function useTrip() {
     if (error) throw error
   }
 
-  async function updateTrip(tripId: string, params: { destinations?: string[]; start_date?: string; end_date?: string }): Promise<Trip> {
+  async function updateTrip(tripId: string, params: { destinations?: string[]; start_date?: string; end_date?: string; status?: string }): Promise<Trip> {
     const { data, error } = await supabase
       .from('trips').update(params).eq('id', tripId).select().single()
     if (error) throw error
