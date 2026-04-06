@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, Alert, Modal, KeyboardAvoidingView, TextInput, Platform, TouchableOpacity } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { supabase } from '../../lib/supabase'
 import { getCachedItinerary, isCacheStale } from '../../lib/offline'
 import { useTrip } from '../../hooks/useTrip'
@@ -12,6 +13,7 @@ import type { Trip, ItineraryDay as IDay, ItineraryItem } from '../../types'
 
 export default function TripDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
+  const insets = useSafeAreaInsets()
   const router = useRouter()
   const { saveItinerary } = useTrip()
   const [trip, setTrip] = useState<Trip | null>(null)
@@ -130,7 +132,7 @@ export default function TripDetailScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <View style={styles.headerRow}>
           <Pressable
             onPress={() => {
@@ -272,7 +274,7 @@ export default function TripDetailScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f8f8' },
-  header: { padding: 24, paddingTop: 60, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#eee' },
+  header: { padding: 24, paddingTop: 16, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#eee' },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   back: {},
   backText: { color: '#0F6E56', fontWeight: '600', fontSize: 15 },

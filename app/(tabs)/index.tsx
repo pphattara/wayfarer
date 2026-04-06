@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { View, Text, StyleSheet, ScrollView, Pressable, TextInput, Alert, Modal } from 'react-native'
 import { useRouter } from 'expo-router'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuth } from '../../hooks/useAuth'
 import { useTrip } from '../../hooks/useTrip'
 import { TripCard } from '../../components/TripCard'
@@ -9,6 +10,7 @@ import type { Trip } from '../../types'
 
 export default function HomeTab() {
   const router = useRouter()
+  const insets = useSafeAreaInsets()
   const { user } = useAuth()
   const { getUserTrips, deleteTrip, updateTrip } = useTrip()
   const [trips, setTrips] = useState<Trip[]>([])
@@ -90,7 +92,7 @@ export default function HomeTab() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40, paddingTop: insets.top + 16 }}>
       <Text style={styles.greeting}>
         Sawadee{user?.display_name ? `, ${user.display_name}` : ''} 👋
       </Text>
@@ -203,7 +205,7 @@ export default function HomeTab() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#ffffff', paddingTop: 60 },
+  container: { flex: 1, backgroundColor: '#ffffff' },
   greeting: { fontSize: 15, fontWeight: '600', color: '#1a1a18', marginBottom: 2, paddingHorizontal: 16 },
   subline: { fontSize: 10, color: '#6b6b66', marginBottom: 16, paddingHorizontal: 16 },
   searchBar: {

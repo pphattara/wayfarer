@@ -13,12 +13,14 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFeed, fetchComments, addComment } from '../../hooks/useFeed';
 import { FeedPost } from '../../components/FeedPost';
 import type { Post, PostComment } from '../../types/social';
 import { supabase } from '../../lib/supabase';
 
 export default function FeedScreen() {
+  const insets = useSafeAreaInsets();
   const { posts, loading, loadingMore, hasMore, refresh, loadMore, likePost, unlikePost } = useFeed();
   const [commentPostId, setCommentPostId] = useState<string | null>(null);
   const [comments, setComments] = useState<PostComment[]>([]);
@@ -87,6 +89,7 @@ export default function FeedScreen() {
             <Text style={styles.emptySubtitle}>Be the first to share your trip</Text>
           </View>
         }
+        contentContainerStyle={{ paddingTop: insets.top }}
       />
 
       {/* Comments modal */}

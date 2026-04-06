@@ -1,6 +1,7 @@
 // app/(tabs)/profile.tsx
 import { useEffect, useState } from 'react'
 import { View, Text, StyleSheet, TextInput, Pressable, Alert, ScrollView } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuth } from '../../hooks/useAuth'
 import { useTrip } from '../../hooks/useTrip'
 import { useCreatorRoutes } from '../../hooks/useCreatorRoutes'
@@ -31,6 +32,7 @@ function InfoRow({ label, value }: { label: string; value: string | null | undef
 }
 
 export default function ProfileTab() {
+  const insets = useSafeAreaInsets()
   const { user, signOut } = useAuth()
   const { getUserTrips } = useTrip()
   const { routes } = useCreatorRoutes()
@@ -94,7 +96,7 @@ export default function ProfileTab() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 60 }}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 60, paddingTop: insets.top + 16 }}>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.avatar}>
@@ -261,7 +263,7 @@ export default function ProfileTab() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8f8f8', paddingTop: 60 },
+  container: { flex: 1, backgroundColor: '#f8f8f8' },
 
   // Header
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, marginBottom: 24 },
