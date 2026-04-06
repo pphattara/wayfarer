@@ -7,11 +7,12 @@ import { useAuth } from '../../../hooks/useAuth'
 import type { VisaSummary } from '../../../types'
 
 export default function VisaScreen() {
-  const { tripId, destination } = useLocalSearchParams<{ tripId: string; destination: string }>()
+  const { tripId, destination, origin, startDate, endDate } = useLocalSearchParams<{ tripId: string; destination: string; origin: string; startDate: string; endDate: string }>()
   const router = useRouter()
   const { user, loading: authLoading } = useAuth()
   const [visa, setVisa] = useState<Partial<VisaSummary> | null>(null)
   const [loading, setLoading] = useState(true)
+  const [fromCache, setFromCache] = useState(false)
 
   useEffect(() => {
     if (authLoading) return  // wait for auth to resolve
@@ -23,6 +24,21 @@ export default function VisaScreen() {
     fetchVisa()
   }, [authLoading, user])
 
+  useEffect(() => {
+    if (!tripId) return
+    supabase
+      .from('visa_summaries')
+      .select('content')
+      .eq('trip_id', tripId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.content && !visa) {
+          setVisa(data.content as any)
+          setFromCache(true)
+        }
+      })
+  }, [tripId])
+
   async function fetchVisa() {
     if (!user) return
     setLoading(true)
@@ -32,12 +48,13 @@ export default function VisaScreen() {
       })
       if (error) throw error
       setVisa(data)
-      await supabase.from('visa_summaries').insert({
+      await supabase.from('visa_summaries').upsert({
         trip_id: tripId,
-        nationality: user.nationality || 'Unknown',
-        destination,
+        nationality: user?.nationality ?? '',
+        destination: destination ?? '',
         content: data,
-      })
+        generated_at: new Date().toISOString(),
+      }, { onConflict: 'trip_id' })
     } catch (e: any) {
       Alert.alert('Visa check failed', e.message)
     } finally {
@@ -60,6 +77,9 @@ export default function VisaScreen() {
         <ActivityIndicator color="#0F6E56" size="large" style={{ marginTop: 40 }} />
       ) : (
         <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 100 }}>
+          {fromCache && (
+            <Text style={{ fontSize: 11, color: '#9b9b96', marginBottom: 8 }}>Loaded from saved data</Text>
+          )}
           <View style={styles.card}>
             <Text style={styles.visaType}>{visa.visa_type}</Text>
             <Text style={styles.timeline}>{visa.timeline}</Text>
