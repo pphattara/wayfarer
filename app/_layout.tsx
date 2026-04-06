@@ -27,7 +27,7 @@ function RootLayoutNav() {
     if (session && isOnboarding && user?.display_name && user?.nationality) {
       router.replace('/(tabs)')
     }
-  }, [session, user, loading, segments])
+  }, [session, user, loading, profileLoading, segments])
 
   if (loading) {
     return (
