@@ -36,12 +36,13 @@ const WEEKDAYS = ['Su','Mo','Tu','We','Th','Fr','Sa']
 type CalStage = 'year' | 'month' | 'day'
 
 function CalendarPicker({
-  value, onChange, startYear, startMonth,
+  value, onChange, startYear, startMonth, minDate,
 }: {
   value: string
   onChange: (d: string) => void
   startYear?: number   // which year to open on
   startMonth?: number  // which month to open on (0-indexed)
+  minDate?: string     // YYYY-MM-DD — dates on/before this are disabled
 }) {
   const today = new Date()
   const todayStr = toDateStr(today.getFullYear(), today.getMonth(), today.getDate())
@@ -159,7 +160,7 @@ function CalendarPicker({
           const dateStr = toDateStr(viewYear, viewMonth, day)
           const isSelected = dateStr === value
           const isToday    = dateStr === todayStr
-          const isPast     = dateStr < todayStr
+          const isPast     = dateStr < todayStr || (minDate !== undefined && dateStr <= minDate)
           return (
             <Pressable
               key={dateStr}
@@ -241,12 +242,13 @@ function CityInput({ label, value, onChange, placeholder }: {
 }
 
 // ─── Date input with calendar modal ──────────────────────────────────────────
-function DateInput({ label, value, onChange, startYear, startMonth }: {
+function DateInput({ label, value, onChange, startYear, startMonth, minDate }: {
   label: string
   value: string
   onChange: (v: string) => void
   startYear?: number
   startMonth?: number
+  minDate?: string
 }) {
   const [open, setOpen] = useState(false)
 
@@ -271,6 +273,7 @@ function DateInput({ label, value, onChange, startYear, startMonth }: {
             onChange={d => { onChange(d); setOpen(false) }}
             startYear={startYear}
             startMonth={startMonth}
+            minDate={minDate}
           />
         </View>
       </Modal>
@@ -373,6 +376,7 @@ export default function TripSetupScreen() {
           onChange={setEndDate}
           startYear={returnStart?.year}
           startMonth={returnStart?.month}
+          minDate={startDate || undefined}
         />
 
         <Pressable
