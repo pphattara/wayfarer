@@ -1,5 +1,6 @@
 // __tests__/hooks/useAuth.test.ts
 import { renderHook, act } from '@testing-library/react-native'
+import React from 'react'
 
 // Mock supabase before importing hook
 jest.mock('../../lib/supabase', () => ({
@@ -9,6 +10,7 @@ jest.mock('../../lib/supabase', () => ({
         data: { subscription: { unsubscribe: jest.fn() } },
       }),
       signOut: jest.fn().mockResolvedValue({ error: null }),
+      getUser: jest.fn().mockResolvedValue({ data: { user: null } }),
     },
     from: jest.fn().mockReturnValue({
       select: jest.fn().mockReturnThis(),
@@ -19,25 +21,31 @@ jest.mock('../../lib/supabase', () => ({
 }))
 
 import { useAuth } from '../../hooks/useAuth'
+import { AuthProvider } from '../../contexts/AuthContext'
+
+const wrapper = ({ children }: { children: React.ReactNode }) =>
+  React.createElement(AuthProvider, null, children)
 
 const getMockOnAuthStateChange = () =>
   require('../../lib/supabase').supabase.auth.onAuthStateChange as jest.Mock
 
 beforeEach(() => {
   getMockOnAuthStateChange().mockClear()
+  getMockOnAuthStateChange().mockReturnValue({
+    data: { subscription: { unsubscribe: jest.fn() } },
+  })
 })
 
 describe('useAuth', () => {
   it('initialises with null session, null user, and loading true', () => {
-    const { result } = renderHook(() => useAuth())
+    const { result } = renderHook(() => useAuth(), { wrapper })
     expect(result.current.session).toBeNull()
     expect(result.current.user).toBeNull()
     expect(result.current.loading).toBe(true)
   })
 
   it('sets loading false after INITIAL_SESSION fires', async () => {
-    const { result } = renderHook(() => useAuth())
-    // After renderHook the hook has registered its listener — grab the callback
+    const { result } = renderHook(() => useAuth(), { wrapper })
     const callback = getMockOnAuthStateChange().mock.calls[0][0]
     await act(async () => {
       callback('INITIAL_SESSION', null)
@@ -47,7 +55,7 @@ describe('useAuth', () => {
   })
 
   it('exposes a signOut function', () => {
-    const { result } = renderHook(() => useAuth())
+    const { result } = renderHook(() => useAuth(), { wrapper })
     expect(typeof result.current.signOut).toBe('function')
   })
 })

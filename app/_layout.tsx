@@ -1,9 +1,10 @@
 // app/_layout.tsx
 import { useEffect } from 'react'
+import { View, ActivityIndicator } from 'react-native'
 import { Stack, useRouter, useSegments } from 'expo-router'
-import { useAuth } from '../hooks/useAuth'
+import { AuthProvider, useAuth } from '../contexts/AuthContext'
 
-export default function RootLayout() {
+function RootLayoutNav() {
   const { session, user, loading, profileLoading } = useAuth()
   const router = useRouter()
   const segments = useSegments()
@@ -28,6 +29,14 @@ export default function RootLayout() {
     }
   }, [session, user, loading, segments])
 
+  if (loading) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff' }}>
+        <ActivityIndicator size="large" color="#0F6E56" />
+      </View>
+    )
+  }
+
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" />
@@ -35,5 +44,13 @@ export default function RootLayout() {
       <Stack.Screen name="auth" />
       <Stack.Screen name="onboarding" />
     </Stack>
+  )
+}
+
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <RootLayoutNav />
+    </AuthProvider>
   )
 }
