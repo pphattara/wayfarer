@@ -6,6 +6,7 @@ import {
 } from 'react-native'
 import { useRouter } from 'expo-router'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../hooks/useAuth'
 import type { UserVisa } from '../types'
 
 const TOTAL_STEPS = 4
@@ -47,6 +48,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 export default function OnboardingScreen() {
   const router = useRouter()
+  const { refreshUser } = useAuth()
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
 
@@ -118,6 +120,7 @@ export default function OnboardingScreen() {
 
       const { error } = await supabase.from('users').update(updates).eq('id', user.id)
       if (error) throw error
+      await refreshUser()
       router.replace('/(tabs)')
     } catch (e: any) {
       Alert.alert('Error', e.message)
