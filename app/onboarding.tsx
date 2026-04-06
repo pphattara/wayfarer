@@ -256,6 +256,8 @@ export default function OnboardingScreen() {
             style={[styles.nextBtn, loading && styles.btnDisabled]}
             onPress={nextStep}
             disabled={loading}
+            accessibilityLabel={isLastStep ? 'Finish onboarding' : 'Next step'}
+            accessibilityRole="button"
           >
             <Text style={styles.nextBtnText}>
               {loading ? 'Saving...' : isLastStep ? 'Finish' : 'Next →'}
@@ -263,13 +265,23 @@ export default function OnboardingScreen() {
           </Pressable>
 
           {isSkippable && (
-            <Pressable style={styles.skipBtn} onPress={() => isLastStep ? handleSave() : setStep(s => s + 1)}>
+            <Pressable
+              style={styles.skipBtn}
+              onPress={() => isLastStep ? handleSave() : setStep(s => s + 1)}
+              accessibilityLabel="Skip this step"
+              accessibilityRole="button"
+            >
               <Text style={styles.skipBtnText}>Skip</Text>
             </Pressable>
           )}
 
           {step > 1 && (
-            <Pressable onPress={() => setStep(s => s - 1)} style={styles.backBtn}>
+            <Pressable
+              onPress={() => setStep(s => s - 1)}
+              style={styles.backBtn}
+              accessibilityLabel="Go back"
+              accessibilityRole="button"
+            >
               <Text style={styles.backBtnText}>← Back</Text>
             </Pressable>
           )}

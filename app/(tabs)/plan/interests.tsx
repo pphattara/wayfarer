@@ -170,6 +170,8 @@ export default function InterestsScreen() {
       <Pressable
         style={[styles.button, selectedCount === 0 && styles.buttonEmpty]}
         onPress={handleNext}
+        accessibilityLabel="Next"
+        accessibilityRole="button"
       >
         <Text style={styles.buttonText}>
           {selectedCount === 0 ? 'Next →' : `Next → (${selectedCount} selected)`}

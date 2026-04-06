@@ -183,10 +183,20 @@ export default function ItineraryScreen() {
             />
           </Field>
 
-          <Pressable style={styles.generateBtn} onPress={handleGenerate}>
+          <Pressable
+            style={styles.generateBtn}
+            onPress={handleGenerate}
+            accessibilityLabel="Generate itinerary"
+            accessibilityRole="button"
+          >
             <Text style={styles.generateBtnText}>Generate itinerary →</Text>
           </Pressable>
-          <Pressable style={styles.skipBtn} onPress={() => { setConfirmed(true); generateItinerary() }}>
+          <Pressable
+            style={styles.skipBtn}
+            onPress={() => { setConfirmed(true); generateItinerary() }}
+            accessibilityLabel="Skip"
+            accessibilityRole="button"
+          >
             <Text style={styles.skipBtnText}>Skip — generate without flight details</Text>
           </Pressable>
         </ScrollView>
@@ -219,13 +229,28 @@ export default function ItineraryScreen() {
 
       {!generating && days.length > 0 && (
         <View style={styles.footer}>
-          <Pressable style={styles.retryButton} onPress={() => { setConfirmed(false); setDays([]) }}>
+          <Pressable
+            style={styles.retryButton}
+            onPress={() => { setConfirmed(false); setDays([]) }}
+            accessibilityLabel="Change flight details"
+            accessibilityRole="button"
+          >
             <Text style={styles.retryText}>Change details</Text>
           </Pressable>
-          <Pressable style={styles.regenerateButton} onPress={generateItinerary}>
+          <Pressable
+            style={styles.regenerateButton}
+            onPress={generateItinerary}
+            accessibilityLabel="Regenerate itinerary"
+            accessibilityRole="button"
+          >
             <Text style={styles.regenerateText}>Regenerate</Text>
           </Pressable>
-          <Pressable style={styles.nextButton} onPress={() => router.push({ pathname: '/(tabs)/plan/best-time', params: { tripId, destination } })}>
+          <Pressable
+            style={styles.nextButton}
+            onPress={() => router.push({ pathname: '/(tabs)/plan/best-time', params: { tripId, destination } })}
+            accessibilityLabel="Next"
+            accessibilityRole="button"
+          >
             <Text style={styles.nextText}>Next →</Text>
           </Pressable>
         </View>

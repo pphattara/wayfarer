@@ -137,7 +137,12 @@ export default function HomeTab() {
         <View style={styles.emptyState}>
           <Text style={styles.emptyTitle}>No trips planned yet</Text>
           <Text style={styles.emptySubtitle}>Use the Plan tab to create your first trip with AI.</Text>
-          <Pressable style={styles.ctaButton} onPress={() => router.push('/(tabs)/plan')}>
+          <Pressable
+            style={styles.ctaButton}
+            onPress={() => router.push('/(tabs)/plan')}
+            accessibilityLabel="Plan your first trip"
+            accessibilityRole="button"
+          >
             <Text style={styles.ctaText}>Plan your first trip</Text>
           </Pressable>
         </View>
@@ -192,6 +197,8 @@ export default function HomeTab() {
             style={[styles.saveBtn, saving && { opacity: 0.6 }]}
             onPress={handleSaveEdit}
             disabled={saving}
+            accessibilityLabel="Save changes"
+            accessibilityRole="button"
           >
             <Text style={styles.saveBtnText}>{saving ? 'Saving…' : 'Save changes'}</Text>
           </Pressable>

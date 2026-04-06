@@ -143,6 +143,8 @@ export default function TripDetailScreen() {
               }
             }}
             style={styles.back}
+            accessibilityLabel="Back"
+            accessibilityRole="button"
           >
             <Text style={styles.backText}>{editing ? '✕ Cancel' : '← Back'}</Text>
           </Pressable>
@@ -151,6 +153,8 @@ export default function TripDetailScreen() {
             onPress={editing ? saveEdits : () => setEditing(true)}
             style={[styles.editBtn, editing && styles.saveBtn]}
             disabled={saving}
+            accessibilityLabel={editing ? 'Save itinerary' : 'Edit itinerary'}
+            accessibilityRole="button"
           >
             {saving
               ? <ActivityIndicator size="small" color="#fff" />
@@ -176,6 +180,8 @@ export default function TripDetailScreen() {
             style={[styles.aiBtn, enhancing && styles.aiBtnLoading]}
             onPress={enhanceWithAI}
             disabled={enhancing}
+            accessibilityLabel="Enhance with AI"
+            accessibilityRole="button"
           >
             {enhancing
               ? <ActivityIndicator size="small" color="#fff" />

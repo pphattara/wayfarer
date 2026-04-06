@@ -13,6 +13,8 @@ export function InterestChip({ label, emoji, selected, onPress }: Props) {
     <Pressable
       style={[styles.chip, selected && styles.chipSelected]}
       onPress={onPress}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: selected }}
     >
       <Text style={[styles.text, selected && styles.textSelected]}>
         {emoji} {label}

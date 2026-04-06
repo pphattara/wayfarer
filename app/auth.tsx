@@ -122,7 +122,12 @@ export default function AuthScreen() {
             onChangeText={setPassword}
             secureTextEntry
           />
-          <Pressable style={styles.googleButton} onPress={signInWithEmail}>
+          <Pressable
+            style={styles.googleButton}
+            onPress={signInWithEmail}
+            accessibilityLabel="Sign in with email and password"
+            accessibilityRole="button"
+          >
             <Text style={styles.googleText}>Continue with Email</Text>
           </Pressable>
           <Pressable onPress={() => setShowEmail(false)}>
@@ -138,10 +143,20 @@ export default function AuthScreen() {
             style={styles.appleButton}
             onPress={signInWithApple}
           />
-          <Pressable style={styles.googleButton} onPress={signInWithGoogle}>
+          <Pressable
+            style={styles.googleButton}
+            onPress={signInWithGoogle}
+            accessibilityLabel="Continue with Google"
+            accessibilityRole="button"
+          >
             <Text style={styles.googleText}>Continue with Google</Text>
           </Pressable>
-          <Pressable style={styles.emailButton} onPress={() => setShowEmail(true)}>
+          <Pressable
+            style={styles.emailButton}
+            onPress={() => setShowEmail(true)}
+            accessibilityLabel="Continue with Email"
+            accessibilityRole="button"
+          >
             <Text style={styles.emailText}>Continue with Email</Text>
           </Pressable>
         </View>
