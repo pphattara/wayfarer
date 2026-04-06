@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { View, ActivityIndicator } from 'react-native'
 import { Stack, useRouter, useSegments } from 'expo-router'
 import { AuthProvider, useAuth } from '../contexts/AuthContext'
+import { ErrorBoundary } from '../components/ErrorBoundary'
 
 function RootLayoutNav() {
   const { session, user, loading, profileLoading } = useAuth()
@@ -38,12 +39,14 @@ function RootLayoutNav() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="trip/[id]" />
-      <Stack.Screen name="auth" />
-      <Stack.Screen name="onboarding" />
-    </Stack>
+    <ErrorBoundary>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="trip/[id]" />
+        <Stack.Screen name="auth" />
+        <Stack.Screen name="onboarding" />
+      </Stack>
+    </ErrorBoundary>
   )
 }
 
