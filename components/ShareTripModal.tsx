@@ -22,7 +22,7 @@ import type { Post } from '../types/social';
 interface ShareTripModalProps {
   visible: boolean;
   tripId: string;
-  destinationName: string;
+  destinationName?: string;
   destinationLat?: number;
   destinationLng?: number;
   onClose: () => void;
@@ -85,7 +85,7 @@ export function ShareTripModal({
           media_urls: mediaUrls,
           lat: destinationLat ?? null,
           lng: destinationLng ?? null,
-          destination_name: destinationName,
+          destination_name: destinationName || null,
           visibility,
         })
         .select()
