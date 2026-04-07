@@ -5,16 +5,21 @@ import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuth } from '../../hooks/useAuth'
 import { useTrip } from '../../hooks/useTrip'
+import { useCollections } from '../../hooks/useCollections'
 import { TripCard } from '../../components/TripCard'
-import type { Trip } from '../../types'
+import { CollectionModal } from '../../components/CollectionModal'
+import type { Trip, Collection } from '../../types'
 
 export default function HomeTab() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const { user } = useAuth()
   const { getUserTrips, deleteTrip, updateTrip } = useTrip()
+  const { getCollections } = useCollections()
   const [trips, setTrips] = useState<Trip[]>([])
+  const [collections, setCollections] = useState<Collection[]>([])
   const [loading, setLoading] = useState(true)
+  const [collectionModalVisible, setCollectionModalVisible] = useState(false)
 
   // Edit modal state
   const [editingTrip, setEditingTrip] = useState<Trip | null>(null)
@@ -29,6 +34,10 @@ export default function HomeTab() {
 
   useEffect(() => {
     loadTrips()
+  }, [])
+
+  useEffect(() => {
+    getCollections().then(setCollections).catch(() => {})
   }, [])
 
   async function loadTrips() {
@@ -89,6 +98,10 @@ export default function HomeTab() {
         },
       ]
     )
+  }
+
+  function handleCollectionSelect(_collectionId: string, _name: string) {
+    setCollectionModalVisible(false)
   }
 
   return (
@@ -157,6 +170,41 @@ export default function HomeTab() {
         ))
       )}
 
+      {/* My Collections */}
+      {collections.length > 0 && (
+        <>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, marginBottom: 8 }}>
+            <Text style={styles.sectionLabel}>My Collections</Text>
+            <Pressable
+              onPress={() => setCollectionModalVisible(true)}
+              accessibilityLabel="View all collections"
+              accessibilityRole="button"
+            >
+              <Text style={{ fontSize: 11, color: '#0F6E56', fontWeight: '600' }}>See all</Text>
+            </Pressable>
+          </View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 16, gap: 10 }}
+            style={{ marginBottom: 20 }}
+          >
+            {collections.slice(0, 6).map(c => (
+              <Pressable
+                key={c.id}
+                style={{ backgroundColor: '#E1F5EE', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10, minWidth: 80, alignItems: 'center' }}
+                onPress={() => setCollectionModalVisible(true)}
+                accessibilityLabel={`Open ${c.name} collection`}
+                accessibilityRole="button"
+              >
+                <Text style={{ fontSize: 18, marginBottom: 4 }}>🗂</Text>
+                <Text style={{ fontSize: 10, fontWeight: '600', color: '#0F6E56', textAlign: 'center' }} numberOfLines={1}>{c.name}</Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </>
+      )}
+
       {/* Edit modal */}
       <Modal visible={!!editingTrip} transparent animationType="slide" onRequestClose={() => setEditingTrip(null)}>
         <Pressable style={styles.backdrop} onPress={() => setEditingTrip(null)} />
@@ -207,6 +255,12 @@ export default function HomeTab() {
           </Pressable>
         </View>
       </Modal>
+
+      <CollectionModal
+        visible={collectionModalVisible}
+        onClose={() => setCollectionModalVisible(false)}
+        onSelect={handleCollectionSelect}
+      />
     </ScrollView>
   )
 }
