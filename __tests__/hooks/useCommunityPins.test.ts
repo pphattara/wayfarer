@@ -30,9 +30,14 @@ describe('useCommunityPins', () => {
     supabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'me' } } });
     supabase.from.mockReturnValue({
       select: jest.fn().mockReturnThis(),
-      order: jest.fn().mockResolvedValue({ data: [mockPin], error: null }),
+      order: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockResolvedValue({ data: [mockPin], error: null }),
+      gte: jest.fn().mockReturnThis(),
+      lte: jest.fn().mockReturnThis(),
       insert: jest.fn().mockReturnThis(),
       single: jest.fn().mockResolvedValue({ data: mockPin, error: null }),
+      delete: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
     });
   });
 
@@ -41,5 +46,16 @@ describe('useCommunityPins', () => {
     await act(async () => {});
     expect(result.current.pins).toHaveLength(1);
     expect(result.current.pins[0].name).toBe('Hidden ramen spot');
+  });
+
+  test('loadInViewport queries pins within bbox', async () => {
+    const { result } = renderHook(() => useCommunityPins());
+    await act(async () => {
+      await result.current.loadInViewport({
+        minLat: 13.6, maxLat: 13.8, minLng: 100.4, maxLng: 100.6,
+      });
+    });
+    const fromMock = require('../../lib/supabase').supabase.from;
+    expect(fromMock).toHaveBeenCalledWith('community_pins');
   });
 });

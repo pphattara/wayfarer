@@ -35,6 +35,8 @@ describe('useFeed', () => {
       select: jest.fn().mockReturnThis(),
       order: jest.fn().mockReturnThis(),
       range: jest.fn().mockResolvedValue({ data: [mockPost], error: null }),
+      insert: jest.fn().mockResolvedValue({ error: null }),
+      delete: jest.fn().mockReturnThis(),
       eq: jest.fn().mockReturnThis(),
       in: jest.fn().mockResolvedValue({ data: [], error: null }),
     };

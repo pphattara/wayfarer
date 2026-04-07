@@ -12,7 +12,7 @@ MapboxGL.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_TOKEN ?? '');
 
 export default function ExploreScreen() {
   const { routes, saveRoute } = useCreatorRoutes();
-  const { pins, addPin } = useCommunityPins();
+  const { pins, addPin, loadInViewport } = useCommunityPins();
 
   const [showRoutes, setShowRoutes] = useState(true);
   const [showPins, setShowPins] = useState(true);
@@ -26,11 +26,23 @@ export default function ExploreScreen() {
     setNewPinCoord({ lat: coords[1], lng: coords[0] });
   };
 
+  const handleRegionDidChange = async (feature: any) => {
+    const bounds = feature.properties?.visibleBounds;
+    if (!bounds) return;
+    await loadInViewport({
+      minLat: bounds[1][1],
+      maxLat: bounds[0][1],
+      minLng: bounds[1][0],
+      maxLng: bounds[0][0],
+    });
+  };
+
   return (
     <View style={styles.container}>
       <MapboxGL.MapView
         style={styles.map}
         onLongPress={handleMapLongPress}
+        onRegionDidChange={handleRegionDidChange}
         accessibilityLabel="Explore map"
       >
         <MapboxGL.Camera

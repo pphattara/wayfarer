@@ -4,6 +4,13 @@ import { supabase } from '../lib/supabase';
 import { uploadMedia } from '../lib/storage';
 import type { CommunityPin, CreatePinInput } from '../types/social';
 
+export interface Bbox {
+  minLat: number
+  maxLat: number
+  minLng: number
+  maxLng: number
+}
+
 export function useCommunityPins() {
   const [pins, setPins] = useState<CommunityPin[]>([]);
   const [loading, setLoading] = useState(true);
@@ -17,9 +24,22 @@ export function useCommunityPins() {
     const { data } = await supabase
       .from('community_pins')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(200);
     setPins((data as CommunityPin[]) ?? []);
     setLoading(false);
+  }
+
+  async function loadInViewport(bbox: Bbox) {
+    const { data, error } = await supabase
+      .from('community_pins')
+      .select('*')
+      .gte('lat', bbox.minLat)
+      .lte('lat', bbox.maxLat)
+      .gte('lng', bbox.minLng)
+      .lte('lng', bbox.maxLng)
+      .limit(100);
+    if (!error && data) setPins(data as CommunityPin[]);
   }
 
   const addPin = useCallback(async (input: CreatePinInput): Promise<CommunityPin | null> => {
@@ -56,5 +76,5 @@ export function useCommunityPins() {
     if (!error) setPins((prev) => prev.filter((p) => p.id !== pinId));
   }, []);
 
-  return { pins, loading, addPin, deletePin, refresh: loadPins };
+  return { pins, loading, addPin, deletePin, refresh: loadPins, loadInViewport };
 }
