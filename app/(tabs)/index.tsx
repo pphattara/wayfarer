@@ -1,6 +1,6 @@
 // app/(tabs)/index.tsx
 import { useEffect, useState } from 'react'
-import { View, Text, StyleSheet, ScrollView, Pressable, TextInput, Alert, Modal } from 'react-native'
+import { View, Text, StyleSheet, ScrollView, Pressable, TextInput, Alert, Modal, ActivityIndicator } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuth } from '../../hooks/useAuth'
@@ -8,7 +8,8 @@ import { useTrip } from '../../hooks/useTrip'
 import { useCollections } from '../../hooks/useCollections'
 import { TripCard } from '../../components/TripCard'
 import { CollectionModal } from '../../components/CollectionModal'
-import type { Trip, Collection } from '../../types'
+import { fetchForecast } from '../../lib/openweather'
+import type { Trip, Collection, WeatherForecastDay } from '../../types'
 
 export default function HomeTab() {
   const router = useRouter()
@@ -20,6 +21,9 @@ export default function HomeTab() {
   const [collections, setCollections] = useState<Collection[]>([])
   const [loading, setLoading] = useState(true)
   const [collectionModalVisible, setCollectionModalVisible] = useState(false)
+  const [nextTripWeather, setNextTripWeather] = useState<WeatherForecastDay | null>(null)
+  const [weatherLoading, setWeatherLoading] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
   // Edit modal state
   const [editingTrip, setEditingTrip] = useState<Trip | null>(null)
@@ -32,6 +36,20 @@ export default function HomeTab() {
   const past = trips.filter(t => new Date(t.end_date) < now)
   const upcoming = trips.filter(t => new Date(t.start_date) >= now)
 
+  const filteredUpcoming = searchQuery.trim()
+    ? upcoming.filter(t =>
+        t.destinations.some(d => d.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (t.trip_name ?? '').toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : upcoming
+
+  const filteredPast = searchQuery.trim()
+    ? past.filter(t =>
+        t.destinations.some(d => d.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (t.trip_name ?? '').toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : past
+
   useEffect(() => {
     loadTrips()
   }, [])
@@ -39,6 +57,16 @@ export default function HomeTab() {
   useEffect(() => {
     getCollections().then(setCollections).catch(() => {})
   }, [])
+
+  useEffect(() => {
+    if (upcoming.length === 0) return
+    const next = upcoming[0]
+    setWeatherLoading(true)
+    fetchForecast(next.destinations[0], next.start_date, next.end_date)
+      .then(days => { if (days.length > 0) setNextTripWeather(days[0]) })
+      .catch(() => {})
+      .finally(() => setWeatherLoading(false))
+  }, [upcoming.length])
 
   async function loadTrips() {
     setLoading(true)
@@ -111,17 +139,35 @@ export default function HomeTab() {
       </Text>
       <Text style={styles.subline}>Where to next?</Text>
 
+      {(weatherLoading || nextTripWeather) && upcoming.length > 0 && (
+        <View style={styles.weatherCard}>
+          <Text style={styles.weatherTitle}>Weather for {upcoming[0].destinations[0]}</Text>
+          {weatherLoading ? (
+            <ActivityIndicator size="small" color="#0F6E56" />
+          ) : nextTripWeather ? (
+            <View style={styles.weatherRow}>
+              <Text style={styles.weatherTemp}>{nextTripWeather.temp_min}° – {nextTripWeather.temp_max}°C</Text>
+              <Text style={styles.weatherDesc}>{nextTripWeather.description}</Text>
+            </View>
+          ) : null}
+        </View>
+      )}
+
       <View style={styles.searchBar}>
         <Text style={styles.searchIcon}>🔍</Text>
         <TextInput
           style={styles.searchInput}
           placeholder="Search destinations, trips, people..."
           placeholderTextColor="#9b9b96"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          accessibilityLabel="Search trips"
+          returnKeyType="search"
         />
       </View>
 
       {/* Recent trips — past trips only */}
-      {past.length > 0 && (
+      {filteredPast.length > 0 && (
         <>
           <Text style={styles.sectionLabel}>Recent trips</Text>
           <ScrollView
@@ -129,7 +175,7 @@ export default function HomeTab() {
             style={styles.storyScroll}
             contentContainerStyle={{ paddingHorizontal: 16, gap: 16 }}
           >
-            {past.map((t, idx) => (
+            {filteredPast.map((t, idx) => (
               <Pressable key={idx} style={styles.storyItem} onPress={() => router.push(`/trip/${t.id}`)}>
                 <View style={styles.storyCircle}>
                   <Text style={styles.storyFlag}>✈️</Text>
@@ -160,7 +206,7 @@ export default function HomeTab() {
           </Pressable>
         </View>
       ) : (
-        upcoming.map(trip => (
+        filteredUpcoming.map(trip => (
           <TripCard
             key={trip.id}
             trip={trip}
@@ -269,6 +315,15 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#ffffff' },
   greeting: { fontSize: 15, fontWeight: '600', color: '#1a1a18', marginBottom: 2, paddingHorizontal: 16 },
   subline: { fontSize: 10, color: '#6b6b66', marginBottom: 16, paddingHorizontal: 16 },
+  weatherCard: {
+    backgroundColor: '#E1F5EE', borderRadius: 12,
+    paddingHorizontal: 16, paddingVertical: 12,
+    marginHorizontal: 16, marginBottom: 16,
+  },
+  weatherTitle: { fontSize: 11, fontWeight: '700', color: '#0F6E56', marginBottom: 6 },
+  weatherRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  weatherTemp: { fontSize: 16, fontWeight: '800', color: '#04342C' },
+  weatherDesc: { fontSize: 12, color: '#0F6E56', textTransform: 'capitalize', flex: 1 },
   searchBar: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: '#f5f5f2',
     borderWidth: 1, borderColor: 'rgba(0,0,0,0.12)', borderRadius: 10,
