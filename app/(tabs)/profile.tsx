@@ -35,7 +35,7 @@ function InfoRow({ label, value }: { label: string; value: string | null | undef
 
 export default function ProfileTab() {
   const insets = useSafeAreaInsets()
-  const { user, signOut } = useAuth()
+  const { user, signOut, refreshUser } = useAuth()
   const { getUserTrips } = useTrip()
   const { routes } = useCreatorRoutes()
   const { getCollections } = useCollections()
@@ -96,6 +96,7 @@ export default function ProfileTab() {
         .update({ display_name: displayName.trim(), nationality: nationality.trim() })
         .eq('id', user.id)
       if (error) throw error
+      await refreshUser()
       setEditing(false)
     } catch (e: any) {
       Alert.alert('Error', e.message)
