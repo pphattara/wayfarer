@@ -66,14 +66,26 @@ export function useFeed() {
 
   const likePost = useCallback(async (postId: string) => {
     if (!currentUserId) return;
+
+    // Optimistic update
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === postId
+          ? { ...p, likes_count: p.likes_count + 1, user_has_liked: true }
+          : p
+      )
+    );
+
     const { error } = await supabase
       .from('post_likes')
       .insert({ post_id: postId, user_id: currentUserId });
-    if (!error) {
+
+    if (error) {
+      // Revert on failure
       setPosts((prev) =>
         prev.map((p) =>
           p.id === postId
-            ? { ...p, likes_count: p.likes_count + 1, user_has_liked: true }
+            ? { ...p, likes_count: Math.max(0, p.likes_count - 1), user_has_liked: false }
             : p
         )
       );
@@ -82,16 +94,28 @@ export function useFeed() {
 
   const unlikePost = useCallback(async (postId: string) => {
     if (!currentUserId) return;
+
+    // Optimistic update
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === postId
+          ? { ...p, likes_count: Math.max(0, p.likes_count - 1), user_has_liked: false }
+          : p
+      )
+    );
+
     const { error } = await supabase
       .from('post_likes')
       .delete()
       .eq('post_id', postId)
       .eq('user_id', currentUserId);
-    if (!error) {
+
+    if (error) {
+      // Revert on failure
       setPosts((prev) =>
         prev.map((p) =>
           p.id === postId
-            ? { ...p, likes_count: Math.max(0, p.likes_count - 1), user_has_liked: false }
+            ? { ...p, likes_count: p.likes_count + 1, user_has_liked: true }
             : p
         )
       );

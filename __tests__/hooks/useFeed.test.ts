@@ -25,6 +25,7 @@ const mockPost: Post = {
   likes_count: 5,
   comments_count: 2,
   created_at: '2026-04-01T10:00:00Z',
+  user_has_liked: false,
 };
 
 describe('useFeed', () => {
@@ -51,5 +52,14 @@ describe('useFeed', () => {
     const { result } = renderHook(() => useFeed());
     expect(result.current.posts).toEqual([]);
     expect(result.current.loading).toBe(true);
+  });
+
+  test('likePost optimistically updates likes_count before network resolves', async () => {
+    const { result } = renderHook(() => useFeed());
+    await act(async () => {});
+    expect(result.current.loading).toBe(false);
+    const initialCount = result.current.posts[0]?.likes_count ?? 0;
+    act(() => { result.current.likePost(result.current.posts[0]?.id ?? 'post-1') });
+    expect(result.current.posts[0]?.likes_count).toBe(initialCount + 1);
   });
 });
