@@ -34,6 +34,10 @@ module.exports = {
     },
     addEventListener: () => ({ remove: () => {} }),
   },
+  Image: 'Image',
+  ScrollView: 'ScrollView',
+  TouchableOpacity: 'TouchableOpacity',
+  Alert: { alert: jest.fn() },
   StyleSheet: {
     create: (styles) => styles,
     flatten: (style) => (Array.isArray(style) ? Object.assign({}, ...style) : style),
