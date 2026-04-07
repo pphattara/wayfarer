@@ -63,12 +63,12 @@ export function CommunityPinModal({
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} accessibilityLabel="Cancel">
+          <TouchableOpacity onPress={onClose} accessibilityLabel="Close pin modal" accessibilityRole="button">
             <Text style={styles.cancelBtn}>Cancel</Text>
           </TouchableOpacity>
           <Text style={styles.title}>{existingPin ? 'Pin Details' : 'Add Pin'}</Text>
           {!existingPin && (
-            <TouchableOpacity onPress={submit} disabled={submitting} accessibilityLabel="Save pin">
+            <TouchableOpacity onPress={submit} disabled={submitting} accessibilityLabel="Add community pin" accessibilityRole="button">
               <Text style={[styles.postBtn, submitting && { opacity: 0.4 }]}>Save</Text>
             </TouchableOpacity>
           )}

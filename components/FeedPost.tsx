@@ -78,6 +78,8 @@ export function FeedPost({ post, onLike, onUnlike, onCommentPress }: FeedPostPro
           onPress={handleLike}
           style={styles.actionBtn}
           accessibilityLabel={post.user_has_liked ? 'Unlike post' : 'Like post'}
+          accessibilityRole="button"
+          accessibilityState={{ selected: post.user_has_liked }}
         >
           <Text style={[styles.actionIcon, post.user_has_liked && styles.likedIcon]}>
             {post.user_has_liked ? '♥' : '♡'}
@@ -89,7 +91,8 @@ export function FeedPost({ post, onLike, onUnlike, onCommentPress }: FeedPostPro
           testID="comment-button"
           onPress={() => onCommentPress(post.id)}
           style={styles.actionBtn}
-          accessibilityLabel="View comments"
+          accessibilityLabel={`${post.comments_count} comments, tap to view`}
+          accessibilityRole="button"
         >
           <Text style={styles.actionIcon}>💬</Text>
           <Text style={styles.actionCount}>{post.comments_count}</Text>

@@ -105,7 +105,7 @@ export default function FeedScreen() {
         >
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Comments</Text>
-            <TouchableOpacity onPress={() => setCommentPostId(null)} accessibilityLabel="Close comments">
+            <TouchableOpacity onPress={() => setCommentPostId(null)} accessibilityLabel="Close comments" accessibilityRole="button">
               <Text style={styles.closeBtn}>Done</Text>
             </TouchableOpacity>
           </View>
@@ -131,7 +131,7 @@ export default function FeedScreen() {
               onSubmitEditing={submitComment}
               accessibilityLabel="Comment input"
             />
-            <TouchableOpacity onPress={submitComment} disabled={submitting} accessibilityLabel="Post comment">
+            <TouchableOpacity onPress={submitComment} disabled={submitting} accessibilityLabel="Post comment" accessibilityRole="button">
               <Text style={[styles.sendBtn, submitting && { opacity: 0.4 }]}>Post</Text>
             </TouchableOpacity>
           </View>

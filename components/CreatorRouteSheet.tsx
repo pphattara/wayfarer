@@ -29,11 +29,11 @@ export function CreatorRouteSheet({ route, onClose, onSave }: CreatorRouteSheetP
     >
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} accessibilityLabel="Close route details">
+          <TouchableOpacity onPress={onClose} accessibilityLabel="Close route details" accessibilityRole="button">
             <Text style={styles.closeBtn}>✕</Text>
           </TouchableOpacity>
           <Text style={styles.title} numberOfLines={1}>{route.title}</Text>
-          <TouchableOpacity style={styles.saveBtn} onPress={() => onSave(route.id)} accessibilityLabel="Save route">
+          <TouchableOpacity style={styles.saveBtn} onPress={() => onSave(route.id)} accessibilityLabel="Save this creator route" accessibilityRole="button">
             <Text style={styles.saveBtnText}>Save Route</Text>
           </TouchableOpacity>
         </View>
