@@ -50,19 +50,22 @@ export function FeedPost({ post, onLike, onUnlike, onCommentPress }: FeedPostPro
       </View>
 
       {/* Media */}
-      {post.media_urls.length > 0 && (
+      {post.media_urls && post.media_urls.length > 0 && (
         <ScrollView
           horizontal
           pagingEnabled
           showsHorizontalScrollIndicator={false}
-          style={{ height: MEDIA_HEIGHT }}
+          style={styles.mediaScroll}
+          contentContainerStyle={{ gap: 4 }}
         >
-          {post.media_urls.map((url, i) => (
+          {post.media_urls.map((url, idx) => (
             <Image
-              key={i}
+              key={idx}
               source={{ uri: url }}
-              style={{ width, height: MEDIA_HEIGHT }}
+              style={styles.mediaImage}
               resizeMode="cover"
+              testID="post-media-image"
+              accessibilityLabel={`Post image ${idx + 1} of ${post.media_urls.length}`}
             />
           ))}
         </ScrollView>
@@ -115,6 +118,8 @@ const styles = StyleSheet.create({
   avatarInitial: { color: '#fff', fontWeight: '700', fontSize: 16 },
   authorName: { fontSize: 14, fontWeight: '700', color: '#111' },
   destination: { fontSize: 12, color: '#888' },
+  mediaScroll: { marginVertical: 8 },
+  mediaImage: { width: 260, height: 180, borderRadius: 10, backgroundColor: '#f0f0f0' },
   actions: { flexDirection: 'row', paddingHorizontal: 12, paddingVertical: 8, gap: 16 },
   actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   actionIcon: { fontSize: 20, color: '#555' },

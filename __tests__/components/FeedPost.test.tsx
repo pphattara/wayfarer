@@ -68,4 +68,22 @@ describe('FeedPost', () => {
     fireEvent.press(getByTestId('comment-button'));
     expect(onCommentPress).toHaveBeenCalledWith('p1');
   });
+
+  test('renders media images when media_urls is populated', () => {
+    const post = {
+      id: 'p1', user_id: 'u1', trip_id: null,
+      caption: 'Great trip!',
+      media_urls: ['https://example.com/img1.jpg', 'https://example.com/img2.jpg'],
+      lat: null, lng: null, destination_name: null,
+      visibility: 'public' as const,
+      likes_count: 0, comments_count: 0,
+      created_at: '2026-04-06T00:00:00Z',
+      author: { display_name: 'Prince', avatar_url: null },
+      user_has_liked: false,
+    }
+    const { getAllByTestId } = render(
+      <FeedPost post={post} onLike={jest.fn()} onUnlike={jest.fn()} onCommentPress={jest.fn()} />
+    )
+    expect(getAllByTestId('post-media-image')).toHaveLength(2)
+  });
 });
