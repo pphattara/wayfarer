@@ -5,8 +5,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuth } from '../../hooks/useAuth'
 import { useTrip } from '../../hooks/useTrip'
 import { useCreatorRoutes } from '../../hooks/useCreatorRoutes'
+import { useCollections } from '../../hooks/useCollections'
+import { CollectionModal } from '../../components/CollectionModal'
 import { supabase } from '../../lib/supabase'
-import type { Trip } from '../../types'
+import type { Trip, Collection } from '../../types'
 
 function StatCard({ value, label }: { value: number; label: string }) {
   return (
@@ -36,8 +38,11 @@ export default function ProfileTab() {
   const { user, signOut } = useAuth()
   const { getUserTrips } = useTrip()
   const { routes } = useCreatorRoutes()
+  const { getCollections } = useCollections()
   const [trips, setTrips] = useState<Trip[]>([])
+  const [collections, setCollections] = useState<Collection[]>([])
   const [tripsLoading, setTripsLoading] = useState(true)
+  const [collectionModalVisible, setCollectionModalVisible] = useState(false)
   const [editing, setEditing] = useState(false)
   const [displayName, setDisplayName] = useState(user?.display_name ?? '')
   const [nationality, setNationality] = useState(user?.nationality ?? '')
@@ -54,6 +59,10 @@ export default function ProfileTab() {
       .then(setTrips)
       .catch(() => {})
       .finally(() => setTripsLoading(false))
+  }, [])
+
+  useEffect(() => {
+    getCollections().then(setCollections).catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -151,6 +160,34 @@ export default function ProfileTab() {
             </View>
           ))}
         </View>
+      )}
+
+      {/* Collections */}
+      {collections.length > 0 && (
+        <>
+          <SectionHeader title="My Collections" />
+          <View style={styles.infoCard}>
+            {collections.map((c, i) => (
+              <View key={c.id}>
+                {i > 0 && <View style={styles.divider} />}
+                <Pressable
+                  style={styles.infoRow}
+                  onPress={() => setCollectionModalVisible(true)}
+                  accessibilityLabel={`Open ${c.name} collection`}
+                  accessibilityRole="button"
+                >
+                  <Text style={styles.infoLabel}>{c.name}</Text>
+                  <Text style={{ fontSize: 13, color: '#0F6E56', fontWeight: '600' }}>›</Text>
+                </Pressable>
+              </View>
+            ))}
+          </View>
+          <CollectionModal
+            visible={collectionModalVisible}
+            onClose={() => setCollectionModalVisible(false)}
+            onSelect={() => setCollectionModalVisible(false)}
+          />
+        </>
       )}
 
       {/* Currently planning */}
