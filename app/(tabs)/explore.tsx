@@ -1,7 +1,8 @@
 // app/(tabs)/explore.tsx
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, TextInput, ActivityIndicator } from 'react-native';
 import MapboxGL from '@rnmapbox/maps';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useCreatorRoutes } from '../../hooks/useCreatorRoutes';
 import { useCommunityPins } from '../../hooks/useCommunityPins';
 import { CreatorRouteSheet } from '../../components/CreatorRouteSheet';
@@ -11,6 +12,7 @@ import type { CreatorRoute, CommunityPin } from '../../types/social';
 MapboxGL.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_TOKEN ?? '');
 
 export default function ExploreScreen() {
+  const insets = useSafeAreaInsets();
   const { routes, saveRoute } = useCreatorRoutes();
   const { pins, addPin, loadInViewport } = useCommunityPins();
 
@@ -19,11 +21,36 @@ export default function ExploreScreen() {
   const [selectedRoute, setSelectedRoute] = useState<CreatorRoute | null>(null);
   const [selectedPin, setSelectedPin] = useState<CommunityPin | null>(null);
   const [newPinCoord, setNewPinCoord] = useState<{ lat: number; lng: number } | null>(null);
+  const [searchText, setSearchText] = useState('');
+  const [searching, setSearching] = useState(false);
+  const cameraRef = React.useRef<MapboxGL.Camera>(null);
 
   const handleMapLongPress = (event: any) => {
     const coords = event.geometry?.coordinates;
     if (!coords) return;
     setNewPinCoord({ lat: coords[1], lng: coords[0] });
+  };
+
+  const handleSearch = async () => {
+    if (!searchText.trim()) return;
+    setSearching(true);
+    try {
+      const token = process.env.EXPO_PUBLIC_MAPBOX_TOKEN ?? '';
+      const res = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchText.trim())}.json?access_token=${token}&limit=1`
+      );
+      const json = await res.json();
+      const feature = json.features?.[0];
+      if (feature) {
+        const [lng, lat] = feature.center;
+        cameraRef.current?.setCamera({
+          centerCoordinate: [lng, lat],
+          zoomLevel: 10,
+          animationDuration: 1000,
+        });
+      }
+    } catch {}
+    setSearching(false);
   };
 
   const handleRegionDidChange = async (feature: any) => {
@@ -46,6 +73,7 @@ export default function ExploreScreen() {
         accessibilityLabel="Explore map"
       >
         <MapboxGL.Camera
+          ref={cameraRef}
           defaultSettings={{
             centerCoordinate: [0, 20],
             zoomLevel: 1.5,
@@ -87,6 +115,32 @@ export default function ExploreScreen() {
           </MapboxGL.PointAnnotation>
         ))}
       </MapboxGL.MapView>
+
+      {/* Search bar */}
+      <View style={[styles.searchBar, { top: insets.top + 12 }]}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search destination..."
+          placeholderTextColor="#9b9b96"
+          value={searchText}
+          onChangeText={setSearchText}
+          returnKeyType="search"
+          onSubmitEditing={handleSearch}
+          accessibilityLabel="Search map destination"
+        />
+        <TouchableOpacity
+          onPress={handleSearch}
+          disabled={searching}
+          accessibilityLabel="Submit map search"
+          accessibilityRole="button"
+          style={styles.searchBtn}
+        >
+          {searching
+            ? <ActivityIndicator size="small" color="#0F6E56" />
+            : <Text style={{ fontSize: 16 }}>🔍</Text>
+          }
+        </TouchableOpacity>
+      </View>
 
       {/* Layer filter toggles */}
       <View style={styles.filterPanel}>
@@ -144,6 +198,20 @@ export default function ExploreScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   map: { flex: 1 },
+  searchBar: {
+    position: 'absolute',
+    left: 16, right: 16,
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 8, elevation: 4,
+    alignItems: 'center', gap: 8,
+    zIndex: 10,
+  },
+  searchInput: { flex: 1, fontSize: 14, color: '#1a1a18' },
+  searchBtn: { padding: 4 },
   pinMarker: {
     width: 28, height: 28, borderRadius: 14,
     backgroundColor: '#E8622A',
